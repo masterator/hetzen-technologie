@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = ""; // Add a digits-only South African number here later, e.g. 27841234567
+const WHATSAPP_NUMBER = "27813004634";
 const WHATSAPP_MESSAGE = "Hello Hetzen Technologies. I would like to discuss a project for my business.";
 
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -29,5 +29,14 @@ document.getElementById('contactForm').addEventListener('submit', (event) => {
   const body = encodeURIComponent(
 `Name: ${form.get('name')}\nBusiness: ${form.get('business')}\nService: ${form.get('service')}\n\nProblem / requirement:\n${form.get('message')}`
   );
-  window.location.href = `mailto:hello@hetzentechnologies.co.za?subject=${subject}&body=${body}`;
+  window.location.href = `mailto:midimetjasilas93@gmail.com?subject=${subject}&body=${body}`;
+});
+
+
+// WhatsApp contact link
+const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+document.querySelectorAll('[data-whatsapp]').forEach((link) => {
+  link.href = whatsappUrl;
+  link.target = '_blank';
+  link.rel = 'noopener';
 });
