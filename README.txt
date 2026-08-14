@@ -3,7 +3,7 @@ Upload these 4 files directly to the repository root:
 index.html
 styles.css
 script.js
-logo.svg
+logo.png
 
 No assets folder is needed.
 WhatsApp: https://wa.me/27813004634
