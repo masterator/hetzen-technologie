@@ -1,188 +1,131 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a0c0f">
-  <meta name="description" content="Hetzen Technologies builds practical digital solutions for businesses: websites, software, AI, automation, IT infrastructure and digital branding.">
-  <title>Hetzen Technologies | Digital Solutions for Smarter Businesses</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Hetzen Technologies builds websites, software, AI automation, digital infrastructure and branding solutions for South African businesses.">
+<title>Hetzen Technologies | Digital Solutions for Businesses</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="nav-wrap">
-    <nav class="container nav">
-      <a href="#top" class="brand" aria-label="Hetzen Technologies home">
-        <img src="assets/logo.png" alt="Hetzen Technologies logo">
-      </a>
-      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
-      <div class="nav-links" id="navLinks">
-        <a href="#services">Services</a>
-        <a href="#smartedge">SmartEdge AI</a>
-        <a href="#process">How We Work</a>
-        <a href="#packages">Solutions</a>
-        <a href="#contact" class="nav-cta">Start a Project</a>
-      </div>
-    </nav>
-  </header>
+<header class="topbar">
+  <a class="brand" href="#home"><img src="logo.svg" alt="Hetzen Technologies"></a>
+  <button class="menu" aria-label="Open menu" onclick="toggleMenu()">☰</button>
+  <nav id="nav">
+    <a href="#services">Services</a>
+    <a href="#smartedge">SmartEdge AI</a>
+    <a href="#process">How We Work</a>
+    <a href="#solutions">Solutions</a>
+    <a class="nav-cta" href="#contact">Start a Project</a>
+  </nav>
+</header>
 
-  <main id="top">
-    <section class="hero section">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span></span> SOUTH AFRICAN DIGITAL TECHNOLOGY COMPANY</div>
-          <h1>Digital solutions for businesses that want to <em>work smarter.</em></h1>
-          <p class="hero-lead">We design and build websites, software, AI-powered workflows, business automation and digital branding that solve real business problems.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#contact">Start a Project <span>→</span></a>
-            <a class="btn btn-ghost" href="#services">Explore Services</a>
-          </div>
-          <div class="hero-proof">
-            <div><strong>Web</strong><span>Business presence & systems</span></div>
-            <div><strong>AI</strong><span>Automation & intelligent workflows</span></div>
-            <div><strong>Brand</strong><span>Digital identity & creative services</span></div>
-          </div>
-        </div>
-        <div class="hero-visual">
-          <div class="orbital"></div>
-          <div class="logo-card">
-            <img src="assets/logo.png" alt="Hetzen Technologies">
-            <div class="logo-card-bottom"><span>INNOVATE</span><b>•</b><span>AUTOMATE</span><b>•</b><span>ELEVATE</span></div>
-          </div>
-          <div class="floating-card card-one"><small>SMARTEDGE AI</small><strong>Build. Automate. Scale.</strong></div>
-          <div class="floating-card card-two"><small>BUILT FOR SMEs</small><strong>Practical technology. Real results.</strong></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="trust-strip">
-      <div class="container trust-inner">
-        <span>WEB DEVELOPMENT</span><i>•</i><span>SOFTWARE</span><i>•</i><span>AI & AUTOMATION</span><i>•</i><span>IT SOLUTIONS</span><i>•</i><span>DIGITAL BRANDING</span>
-      </div>
-    </section>
-
-    <section id="services" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow"><span></span> WHAT WE DO</div>
-            <h2>Technology that solves the business problem.</h2>
-          </div>
-          <p>Hetzen combines software, AI, digital infrastructure and creative services into practical solutions that are designed around how your business actually works.</p>
-        </div>
-        <div class="service-grid">
-          <article class="service-card featured">
-            <div class="service-icon">01</div>
-            <h3>Websites & Software</h3>
-            <p>Professional websites, business systems, dashboards, databases and custom web applications.</p>
-            <ul><li>Business websites</li><li>Web applications</li><li>Customer/lead systems</li><li>Dashboards & integrations</li></ul>
-          </article>
-          <article class="service-card">
-            <div class="service-icon">02</div>
-            <h3>AI & Automation</h3>
-            <p>Turn repetitive work into smarter workflows with practical AI and automation.</p>
-            <ul><li>AI assistants</li><li>WhatsApp workflows</li><li>Lead capture & follow-up</li><li>Reports & document automation</li></ul>
-          </article>
-          <article class="service-card">
-            <div class="service-icon">03</div>
-            <h3>IT & Digital Infrastructure</h3>
-            <p>Keep your business technology organised, connected and ready to support growth.</p>
-            <ul><li>Networking & Wi-Fi</li><li>Cloud/workspace setup</li><li>Backups & digital organisation</li><li>Technology consulting</li></ul>
-          </article>
-          <article class="service-card">
-            <div class="service-icon">04</div>
-            <h3>Digital Branding</h3>
-            <p>Build a brand that looks professional across screens, clothing and print.</p>
-            <ul><li>Logo & identity design</li><li>Social graphics</li><li>Business profiles</li><li>Embroidery-ready artwork</li></ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="smartedge" class="section dark-section">
-      <div class="container smart-grid">
-        <div>
-          <div class="eyebrow light"><span></span> POWERED BY HETZEN TECHNOLOGIES</div>
-          <h2>Meet <em>SmartEdge AI.</em></h2>
-          <p class="smart-lead">SmartEdge AI is our flagship AI and automation technology project—built around data, intelligent decision systems, risk controls, monitoring and automation.</p>
-          <div class="smart-actions"><a class="btn btn-primary" href="#contact">Discuss an AI Project</a><a class="text-link" href="#process">See Our Process →</a></div>
-        </div>
-        <div class="smart-panel">
-          <div class="panel-top"><span>HETZEN / SMARTEDGE</span><span class="live-dot">● ONLINE CONCEPT</span></div>
-          <div class="panel-grid">
-            <div><small>INTELLIGENCE</small><strong>AI</strong><span>Models & decision logic</span></div>
-            <div><small>AUTOMATION</small><strong>FLOW</strong><span>Workflows & integrations</span></div>
-            <div><small>MONITORING</small><strong>GUARD</strong><span>Health & control layers</span></div>
-            <div><small>DATA</small><strong>CORE</strong><span>Memory & analytics</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="process" class="section">
-      <div class="container">
-        <div class="section-head compact"><div><div class="eyebrow"><span></span> OUR PROCESS</div><h2>From problem to working solution.</h2></div><p>You don't need to know which technology you need. Tell us what is slowing your business down.</p></div>
-        <div class="process-grid">
-          <div class="process-step"><span>01</span><h3>Discover</h3><p>We understand your business, bottlenecks, customers and goals.</p></div>
-          <div class="process-step"><span>02</span><h3>Design</h3><p>We map the simplest digital solution that can solve the problem.</p></div>
-          <div class="process-step"><span>03</span><h3>Build</h3><p>We develop, configure and test the solution with you.</p></div>
-          <div class="process-step"><span>04</span><h3>Improve</h3><p>We support, optimise and automate as your business grows.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="packages" class="section soft-section">
-      <div class="container">
-        <div class="section-head compact"><div><div class="eyebrow"><span></span> STARTING SOLUTIONS</div><h2>Choose the starting point.</h2></div><p>Prices below are starting points. A final quote is based on scope, integrations and complexity.</p></div>
-        <div class="pricing-grid">
-          <article class="price-card"><div class="price-tag">STARTER</div><h3>Hetzen Digital Starter</h3><div class="price">From <strong>R1,500</strong></div><p>For a small business that needs a professional digital foundation.</p><ul><li>Digital business profile</li><li>WhatsApp Business setup</li><li>Basic online presence</li><li>Google profile guidance</li><li>Social profile setup</li></ul><a href="#contact">Request this solution →</a></article>
-          <article class="price-card featured-price"><div class="ribbon">MOST POPULAR</div><div class="price-tag">BUSINESS</div><h3>Hetzen Business System</h3><div class="price">From <strong>R3,500</strong></div><p>For businesses ready to move beyond a basic website.</p><ul><li>Professional website</li><li>Business email setup</li><li>Lead/contact forms</li><li>WhatsApp integration</li><li>Basic dashboard or database</li></ul><a href="#contact">Request this solution →</a></article>
-          <article class="price-card"><div class="price-tag">AUTOMATE</div><h3>Hetzen Automate</h3><div class="price">From <strong>R5,000</strong></div><p>For repetitive processes that should run faster and smarter.</p><ul><li>Workflow automation</li><li>AI assistant options</li><li>Lead capture & follow-up</li><li>Automated reporting</li><li>Business integrations</li></ul><a href="#contact">Discuss automation →</a></article>
-        </div>
-        <p class="pricing-note">Monthly support and maintenance can be added to any suitable project. Custom software and larger AI/automation projects are quoted separately.</p>
-      </div>
-    </section>
-
-    <section class="section quote-section">
-      <div class="container quote-box">
-        <div><div class="eyebrow light"><span></span> WHY HETZEN</div><h2>Don't buy technology. <em>Buy a better way of working.</em></h2></div>
-        <a class="btn btn-primary" href="#contact">Let's Talk <span>→</span></a>
-      </div>
-    </section>
-
-    <section id="contact" class="section contact-section">
-      <div class="container contact-grid">
-        <div>
-          <div class="eyebrow"><span></span> START A PROJECT</div>
-          <h2>Tell us what's slowing your business down.</h2>
-          <p>We’ll help identify the digital solution that makes sense for your business, budget and goals.</p>
-          <div class="contact-points"><a class="btn btn-primary" data-whatsapp href="https://wa.me/27813004634" target="_blank" rel="noopener">Chat on WhatsApp →</a>
-            <div><strong>Email</strong><span>midimetjasilas93@gmail.com</span></div>
-            <div><strong>WhatsApp</strong><span>081 300 4634</span></div>
-            <div><strong>Service Area</strong><span>South Africa • Remote & Local Business Solutions</span></div>
-          </div>
-        </div>
-        <form class="contact-form" id="contactForm">
-          <label>Full name<input name="name" required placeholder="Your name"></label>
-          <label>Business name<input name="business" required placeholder="Your business"></label>
-          <label>What do you need help with?<select name="service" required><option value="">Select a service</option><option>Website / Software</option><option>AI / Automation</option><option>IT / Digital Infrastructure</option><option>Digital Branding</option><option>I'm not sure yet</option></select></label>
-          <label>Tell us about the problem<textarea name="message" required rows="5" placeholder="What are you trying to improve or automate?"></textarea></label>
-          <button class="btn btn-primary full" type="submit">Send Project Enquiry <span>→</span></button>
-          <p class="form-note">This form opens your email client with your enquiry prepared for Hetzen Technologies.</p>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container footer-inner">
-      <div><div class="footer-brand">HETZEN TECHNOLOGIES</div><p>Digital solutions for businesses that want to work smarter.</p></div>
-      <div class="footer-links"><a href="#services">Services</a><a href="#smartedge">SmartEdge AI</a><a href="#packages">Solutions</a><a href="#contact">Contact</a></div>
-      <div class="footer-bottom"><span>© <span id="year"></span> Hetzen Technologies. All rights reserved.</span><span>INNOVATE • AUTOMATE • ELEVATE</span></div>
+<main>
+<section id="home" class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">SOUTH AFRICAN DIGITAL TECHNOLOGY COMPANY</div>
+    <h1>We turn business problems into <span>digital solutions.</span></h1>
+    <p>Websites, software, AI-powered workflows, business automation and digital branding designed to save time, improve customer service and help businesses grow.</p>
+    <div class="actions">
+      <a class="btn primary" href="#contact">Get a Free Digital Check-up <span>→</span></a>
+      <a class="btn ghost" href="#services">Explore Services</a>
     </div>
-  </footer>
-  <script src="script.js"></script>
+  </div>
+  <div class="hero-card">
+    <div class="card-label">WHAT WE BUILD</div>
+    <div class="mini-grid">
+      <div><b>WEB</b><span>Business websites & systems</span></div>
+      <div><b>AI</b><span>Automation & intelligent workflows</span></div>
+      <div><b>IT</b><span>Digital infrastructure & support</span></div>
+      <div><b>BRAND</b><span>Identity & digital creative</span></div>
+    </div>
+    <div class="tagline">INNOVATE • AUTOMATE • ELEVATE</div>
+  </div>
+</section>
+
+<section id="services" class="section">
+  <div class="section-head">
+    <div class="eyebrow">WHAT WE DO</div>
+    <h2>Technology that solves the business problem.</h2>
+    <p>We combine software, AI, digital infrastructure and creative services into practical solutions built around how your business actually works.</p>
+  </div>
+  <div class="service-grid">
+    <article class="service"><div class="num">01</div><h3>Websites & Software</h3><p>Professional websites, business systems, dashboards, databases and custom web applications.</p><ul><li>Business websites</li><li>Web applications</li><li>Customer & lead systems</li><li>Dashboards & integrations</li></ul></article>
+    <article class="service"><div class="num">02</div><h3>AI & Automation</h3><p>Turn repetitive work into smarter workflows with practical AI and automation.</p><ul><li>AI assistants</li><li>WhatsApp workflows</li><li>Lead capture & follow-up</li><li>Reports & document automation</li></ul></article>
+    <article class="service"><div class="num">03</div><h3>IT & Digital Infrastructure</h3><p>Keep business technology organised, connected and ready to support growth.</p><ul><li>Networking & Wi-Fi</li><li>Cloud & workspace setup</li><li>Backups & digital organisation</li><li>Technology consulting</li></ul></article>
+    <article class="service"><div class="num">04</div><h3>Digital Branding</h3><p>Build a brand that looks professional across screens, clothing and print.</p><ul><li>Logo & identity design</li><li>Social graphics</li><li>Business profiles</li><li>Embroidery-ready artwork</li></ul></article>
+  </div>
+</section>
+
+<section id="smartedge" class="feature">
+  <div>
+    <div class="eyebrow">POWERED BY HETZEN TECHNOLOGIES</div>
+    <h2>Meet <span>SmartEdge AI.</span></h2>
+    <p>SmartEdge AI is Hetzen Technologies' flagship AI and automation project, focused on intelligent decision systems, data, monitoring, risk controls and automated workflows.</p>
+    <a class="btn primary" href="#contact">Discuss an AI Project</a>
+  </div>
+  <div class="stack">
+    <div><b>INTELLIGENCE</b><span>Models & decision logic</span></div>
+    <div><b>AUTOMATION</b><span>Workflows & integrations</span></div>
+    <div><b>MONITORING</b><span>Health & control layers</span></div>
+    <div><b>DATA</b><span>Memory & analytics</span></div>
+  </div>
+</section>
+
+<section id="process" class="section">
+  <div class="section-head">
+    <div class="eyebrow">OUR PROCESS</div>
+    <h2>From problem to working solution.</h2>
+    <p>You don't need to know which technology you need. Tell us what is slowing your business down.</p>
+  </div>
+  <div class="process-grid">
+    <div><b>01</b><h3>Discover</h3><p>We understand your business, bottlenecks, customers and goals.</p></div>
+    <div><b>02</b><h3>Design</h3><p>We map the simplest digital solution that can solve the problem.</p></div>
+    <div><b>03</b><h3>Build</h3><p>We develop, configure and test the solution with you.</p></div>
+    <div><b>04</b><h3>Improve</h3><p>We support, optimise and automate as your business grows.</p></div>
+  </div>
+</section>
+
+<section id="solutions" class="section dark">
+  <div class="section-head">
+    <div class="eyebrow">STARTING SOLUTIONS</div>
+    <h2>Choose the starting point.</h2>
+    <p>Prices are starting points. A final quote is based on scope, integrations and complexity.</p>
+  </div>
+  <div class="pricing">
+    <article><span>STARTER</span><h3>Hetzen Digital Starter</h3><strong>From R1,500</strong><p>For a small business that needs a professional digital foundation.</p><ul><li>Digital business profile</li><li>WhatsApp Business setup</li><li>Basic online presence</li><li>Google profile guidance</li><li>Social profile setup</li></ul><a href="#contact">Request this solution →</a></article>
+    <article class="featured"><span>MOST POPULAR</span><h3>Hetzen Business System</h3><strong>From R3,500</strong><p>For businesses ready to move beyond a basic website.</p><ul><li>Professional website</li><li>Business email setup</li><li>Lead/contact forms</li><li>WhatsApp integration</li><li>Basic dashboard or database</li></ul><a href="#contact">Request this solution →</a></article>
+    <article><span>AUTOMATE</span><h3>Hetzen Automate</h3><strong>From R5,000</strong><p>For repetitive processes that should run faster and smarter.</p><ul><li>Workflow automation</li><li>AI assistant options</li><li>Lead capture & follow-up</li><li>Automated reporting</li><li>Business integrations</li></ul><a href="#contact">Discuss automation →</a></article>
+  </div>
+</section>
+
+<section class="cta">
+  <div><div class="eyebrow">START A PROJECT</div><h2>Get a free digital check-up.</h2><p>Tell us what's slowing your business down. We'll help identify the digital solution that makes sense for your business, budget and goals.</p></div>
+  <a class="btn primary" href="#contact">Let's Talk →</a>
+</section>
+
+<section id="contact" class="section contact">
+  <div class="section-head"><div class="eyebrow">CONTACT HETZEN</div><h2>Tell us what you need help with.</h2></div>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <a class="contact-link" href="https://wa.me/27813004634" target="_blank" rel="noopener"><b>WhatsApp</b><span>+27 81 300 4634</span></a>
+      <a class="contact-link" href="mailto:midimetjasilas93@gmail.com"><b>Email</b><span>midimetjasilas93@gmail.com</span></a>
+      <div class="contact-link"><b>Service Area</b><span>South Africa • Remote & Local Business Solutions</span></div>
+    </div>
+    <form id="enquiry">
+      <input name="name" placeholder="Your name" required>
+      <input name="business" placeholder="Your business name">
+      <select name="service" required><option value="">Select a service</option><option>Websites & Software</option><option>AI & Automation</option><option>IT & Digital Infrastructure</option><option>Digital Branding</option><option>Free Digital Check-up</option></select>
+      <textarea name="problem" rows="6" placeholder="What are you trying to improve or automate?" required></textarea>
+      <button class="btn primary" type="submit">Send Project Enquiry →</button>
+      <small>This form prepares an email to Hetzen Technologies.</small>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer><div><b>HETZEN TECHNOLOGIES</b><span>Digital solutions for businesses that want to work smarter.</span></div><div class="footer-tag">INNOVATE • AUTOMATE • ELEVATE</div></footer>
+<script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260">
+<rect width="900" height="260" fill="none"/>
+<g transform="translate(30 20)">
+  <circle cx="110" cy="110" r="92" fill="#111"/>
+  <circle cx="110" cy="110" r="80" fill="#181818" stroke="#c9a227" stroke-width="5"/>
+  <path d="M70 160V60h24v39h32V60h24v100h-24v-40H94v40z" fill="#fff"/>
+  <path d="M43 145c34-52 86-71 139-67" fill="none" stroke="#c9a227" stroke-width="10" stroke-linecap="round"/>
+</g>
+<text x="245" y="120" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" fill="#111">HETZEN</text>
+<text x="248" y="170" font-family="Arial, Helvetica, sans-serif" font-size="34" letter-spacing="7" font-weight="700" fill="#c9a227">TECHNOLOGIES</text>
+</svg>
