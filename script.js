@@ -29,6 +29,6 @@ if (quoteForm) {
     e.preventDefault();
     const data = new FormData(quoteForm);
     const message = `Hello Hetzen Technologies, I would like to request a quote.\n\nName: ${data.get("name")}\nBusiness: ${data.get("business") || "Not provided"}\nEmail: ${data.get("email")}\nPhone/WhatsApp: ${data.get("phone")}\nService: ${data.get("service")}\nBudget: ${data.get("budget") || "Not specified"}\nTimeline: ${data.get("timeline") || "Not specified"}\n\nProject details:\n${data.get("details")}`;
-    window.open(`https://wa.me/27813004634?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+    window.open(`https://wa.me/27786246258?text=${encodeURIComponent(message)}`, "_blank", "noopener");
   });
 }
