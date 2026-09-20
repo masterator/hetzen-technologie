@@ -75,7 +75,7 @@
         'Details: ' + details
       ].join('\n');
 
-      const whatsappUrl = 'https://wa.me/27813004634?text=' + encodeURIComponent(message);
+      const whatsappUrl = 'https://wa.me/27786246258?text=' + encodeURIComponent(message);
       window.open(whatsappUrl, '_blank', 'noopener');
     });
   }
