@@ -40,7 +40,14 @@ body{background:var(--bg);color:var(--ink)}
 
 @media print{body{background:#fff}.side,.top,.mobile-nav,.no-print,.modal{display:none!important}.main{margin:0;width:100%}.content{padding:0;max-width:none}.page{display:none!important}.page.print-target{display:block!important}.print-sheet{padding:35px;max-width:900px;margin:auto}.print-sheet .print-logo{width:170px;height:auto;margin-bottom:15px}.print-table{width:100%;border-collapse:collapse;margin-top:18px}.print-table th,.print-table td{border:1px solid #ddd;padding:9px;text-align:left;font-size:12px}.print-table th{background:#f5f1e5}.print-total{text-align:right;font-size:18px;font-weight:700;margin-top:18px}.print-footer{margin-top:35px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#777}}
 .offline-badge{display:inline-flex;align-items:center;gap:6px;background:#eef6ee;color:#2d6b3e;border:1px solid #cfe3d3;border-radius:99px;padding:7px 10px;font-size:11px;font-weight:800;letter-spacing:.4px}.offline-box{background:#f7f7f4;border:1px solid var(--line);border-radius:10px;padding:15px;margin-top:14px}.offline-box h4{margin:0 0 6px}.offline-box p{font-size:12px;color:#666;margin:0 0 12px}.backup-actions{display:flex;gap:8px;flex-wrap:wrap}.backup-status{font-size:11px;color:#777;margin-top:8px}.danger-zone{margin-top:18px;border:1px solid #e6c5c2;background:var(--surface);border-radius:10px;padding:16px}.danger-zone h4{margin:0 0 6px;color:var(--red)}.danger-zone p{font-size:12px;color:var(--muted);margin:0 0 12px}.confirm-box{width:min(520px,100%)}.confirm-warning{background:#f7e5e3;border:1px solid #e6c5c2;color:#8b2d28;border-radius:8px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:14px}.confirm-code{font-weight:800;letter-spacing:1px}.pdf-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.report-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.report-type{border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px;text-align:left}.report-type strong{display:block}.report-type span{font-size:11px;color:#777}.report-history{margin-top:18px}@media(max-width:650px){.report-type-grid{grid-template-columns:1fr}}
-</style>
+<style id="dashboard20Styles">
+.dash-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+.dash-grid-2{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px}
+.dash-activity{margin-top:18px}
+.dash-grid-3 .panel,.dash-grid-2 .panel,.dash-activity{min-width:0}
+@media(max-width:950px){.dash-grid-3{grid-template-columns:1fr 1fr}.dash-grid-2{grid-template-columns:1fr}}
+@media(max-width:650px){.dash-grid-3{grid-template-columns:1fr}.dash-grid-2{grid-template-columns:1fr}}
+</style></style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
 <style>.pwa-status{position:fixed;right:14px;bottom:14px;z-index:9999;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;color:var(--muted)}.pwa-status.online{display:none}.install-btn{display:none}.install-btn.show{display:inline-flex}</style></head>
 <body><div id="pwaStatus" class="pwa-status">Cloud-ready</div>
@@ -74,7 +81,7 @@ body{background:var(--bg);color:var(--ink)}
 <header class="top"><div style="display:flex;align-items:center;gap:8px"><button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="openMobileNav()">☰</button><h1 id="title">Business Dashboard</h1></div><div class="top-actions"><span id="cloudBadge" class="cloud-badge">● CLOUD</span><span class="tag">Technology. Digital Solutions. Business Growth.</span><button class="btn light desktop-only" onclick="openModal('quickModal')">Quick Add</button><button class="btn light" onclick="logoutPortal()">Log out</button></div></header>
 <div class="content">
 <section id="dashboard" class="page active">
-  <div class="hero"><div><h2>Welcome to your Hetzen workspace.</h2><p>Your complete Hetzen business workspace.</p></div><button class="btn gold" onclick="go('consultations')">+ New Consultation</button></div>
+  <div class="hero"><div><h2>Business overview</h2><p>See customers, sales, delivery, payments and support from one place.</p></div><button class="btn gold" onclick="go('consultations')">+ New Consultation</button></div>
   <div class="cards" id="dashCards"></div>
   <div class="quick-grid">
     <button class="quick" onclick="openModal('customerModal')"><strong>+ Customer</strong><span>Create a customer record</span></button>
@@ -82,7 +89,16 @@ body{background:var(--bg);color:var(--ink)}
     <button class="quick" onclick="openModal('quoteModal')"><strong>+ Quote</strong><span>Build a service quote</span></button>
     <button class="quick" onclick="openModal('taskModal')"><strong>+ Task</strong><span>Add work to your list</span></button>
   </div>
-  <div class="grid"><div class="panel"><h3>Work by service</h3><div id="serviceWork"></div></div><div class="panel"><h3>Today's actions</h3><div id="todayActions"></div></div></div>
+  <div class="dash-grid-3">
+    <div class="panel"><h3>Sales pipeline</h3><div id="dashPipeline"></div></div>
+    <div class="panel"><h3>Financial position</h3><div id="dashFinance"></div></div>
+    <div class="panel"><h3>Delivery status</h3><div id="dashDelivery"></div></div>
+  </div>
+  <div class="dash-grid-2">
+    <div class="panel"><h3>Work by service</h3><div id="serviceWork"></div></div>
+    <div class="panel"><h3>Attention needed</h3><div id="todayActions"></div></div>
+  </div>
+  <div class="panel dash-activity"><h3>Recent business activity</h3><div id="dashActivity"></div></div>
 </section>
 <section id="customers" class="page"><div class="hero"><div><h2>Customers</h2><p>One customer record for all services and future projects.</p></div><button class="btn gold" onclick="openModal('customerModal')">+ New Customer</button></div><div class="toolbar"><input class="search" id="customerSearch" placeholder="Search customers..." oninput="renderCustomers()"><button class="btn light" onclick="go('consultations')">Start Consultation</button></div><div class="table"><table><thead><tr><th>Customer</th><th>Contact</th><th>Services</th><th>Projects</th><th>Status</th><th>Action</th></tr></thead><tbody id="customerRows"></tbody></table></div></section>
 <section id="leads" class="page"><div class="hero"><div><h2>Leads & Enquiries</h2><p>Capture opportunities before they become customers.</p></div><button class="btn gold" onclick="openModal('leadModal')">+ New Lead</button></div><div class="toolbar"><input class="search" id="leadSearch" placeholder="Search leads..." oninput="renderLeads()"></div><div class="table"><table><thead><tr><th>Lead</th><th>Source</th><th>Need</th><th>Stage</th><th>Next action</th><th>Action</th></tr></thead><tbody id="leadRows"></tbody></table></div></section>
@@ -183,7 +199,60 @@ function openStartFresh(){const m=document.getElementById('startFreshModal');if(
 async function confirmStartFresh(){const code=(document.getElementById('startFreshCode')?.value||'').trim();const btn=document.getElementById('startFreshConfirmBtn');const st=document.getElementById('startFreshStatus');if(code!=='CLEAR'){if(st)st.textContent='Confirmation not accepted. Type CLEAR exactly.';return}if(!window.hetzenSupabase){if(st)st.textContent='Cloud connection is not ready. Sign in again and try again.';return}if(btn){btn.disabled=true;btn.textContent='Clearing...'}if(st)st.textContent='Clearing your Hetzen workspace in Supabase...';try{clearTimeout(window.hetzenSaveTimer);const user=(await window.hetzenSupabase.auth.getUser()).data.user;if(!user)throw new Error('No signed-in user.');const settings=JSON.parse(localStorage.getItem('hetzenSettings')||'null');const empty={customers:[],leads:[],consultations:[],projects:[],quotes:[],invoices:[],documents:[],tasks:[],support:[],forms:[],automations:[]};const {error}=await window.hetzenSupabase.from('portal_state').upsert({owner_id:user.id,data:empty,settings,report_history:[],updated_at:new Date().toISOString()},{onConflict:'owner_id'});if(error)throw error;db=empty;localStorage.setItem(DATA_KEY,JSON.stringify(db));localStorage.setItem('hetzenReportHistory','[]');localStorage.removeItem('hetzenLastDocumentText');localStorage.removeItem('hetzenLastDocumentNumber');localStorage.removeItem('hetzenLastDocumentTitle');localStorage.removeItem('hetzenDocumentCounters');renderAll();closeModal('startFreshModal');toast('Business workspace cleared. You can start fresh.')}catch(err){console.error(err);if(st)st.textContent='Clear failed: '+(err.message||'Unable to update Supabase. Your existing data was not changed.');}finally{if(btn){btn.disabled=false;btn.textContent='Clear Workspace'}}}document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function money(n){return 'R'+Number(n||0).toLocaleString('en-ZA')}
 function statusPill(s){const v=String(s);let c=v==='Paid'||v==='Complete'||v==='Active'||v==='Ready'||v==='On'?'green':v==='Overdue'||v==='Urgent'||v==='Lost'?'red':v==='Due'||v==='Awaiting'||v==='Requirements'||v==='Draft'?'gold':'blue';return `<span class="pill ${c}">${esc(v)}</span>`}
-function renderDashboard(){document.getElementById('dashCards').innerHTML=[['Active Customers',db.customers.filter(x=>x.status!=='Archived').length,'Central customer records'],['Open Projects',db.projects.filter(x=>x.status!=='Complete').length,'Across all service types'],['Quotes Awaiting',db.quotes.filter(x=>x.status==='Awaiting').length,'Need follow-up'],['Open Support',db.support.filter(x=>x.status!=='Closed').length,'Post-handover work']].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');document.getElementById('serviceWork').innerHTML=services.map(s=>`<div class="row"><span>${s[1]}</span><b>${db.projects.filter(p=>p.services.toLowerCase().includes(s[1].split(' ')[0].toLowerCase())).length}</b></div>`).join('');document.getElementById('todayActions').innerHTML=db.tasks.slice(0,4).map(t=>`<div class="row"><span>${esc(t.name)}</span>${statusPill(t.status)}</div>`).join('')}
+function renderDashboard(){
+  const activeCustomers=db.customers.filter(x=>x.status!=='Archived').length;
+  const openProjects=db.projects.filter(x=>x.status!=='Complete').length;
+  const openLeads=db.leads.filter(x=>!['Won','Lost'].includes(x.stage)).length;
+  const acceptedQuotes=db.quotes.filter(x=>x.status==='Accepted');
+  const quoteValue=db.quotes.reduce((n,x)=>n+Number(x.amount||0),0);
+  const invoiced=db.invoices.reduce((n,x)=>n+Number(x.amount||0),0);
+  const paid=db.invoices.filter(x=>x.status==='Paid').reduce((n,x)=>n+Number(x.amount||0),0);
+  const outstanding=Math.max(0,invoiced-paid);
+  const overdueInvoices=db.invoices.filter(x=>x.status==='Overdue').length;
+  const overdueTasks=db.tasks.filter(x=>x.due&&x.due!=='—'&&new Date(x.due+'T23:59:59')<new Date()&&x.status!=='Done').length;
+  const openSupport=db.support.filter(x=>x.status!=='Closed').length;
+  const cards=[
+    ['Active Customers',activeCustomers,'Central customer records'],
+    ['Open Leads',openLeads,'New and active opportunities'],
+    ['Quote Pipeline',money(quoteValue),'All recorded quotations'],
+    ['Outstanding',money(outstanding),'Invoices not marked Paid'],
+    ['Open Projects',openProjects,'Work still in delivery'],
+    ['Accepted Quotes',acceptedQuotes.length,'Ready for delivery workflow'],
+    ['Open Support',openSupport,'Tickets not closed'],
+    ['Attention Items',overdueInvoices+overdueTasks,'Overdue invoices + tasks']
+  ];
+  document.getElementById('dashCards').innerHTML=cards.map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${esc(x[1])}</div><div class="sub">${x[2]}</div></div>`).join('');
+  const stages=['New','Discovery','Quote','Won','Lost'];
+  document.getElementById('dashPipeline').innerHTML=stages.map(s=>{const rows=db.leads.filter(x=>x.stage===s);return `<div class="row"><span>${esc(s)}</span><b>${rows.length}</b></div>`}).join('')||'<div class="empty">No leads recorded yet.</div>';
+  document.getElementById('dashFinance').innerHTML=[
+    `<div class="row"><span>Total quoted</span><b>${money(quoteValue)}</b></div>`,
+    `<div class="row"><span>Total invoiced</span><b>${money(invoiced)}</b></div>`,
+    `<div class="row"><span>Paid</span><b>${money(paid)}</b></div>`,
+    `<div class="row"><span>Outstanding</span><b>${money(outstanding)}</b></div>`
+  ].join('');
+  const delivery=[
+    ['Requirements',db.projects.filter(x=>x.status==='Requirements').length],
+    ['Build',db.projects.filter(x=>x.status==='Build').length],
+    ['Review',db.projects.filter(x=>x.status==='Review').length],
+    ['Handover',db.projects.filter(x=>x.status==='Handover').length],
+    ['Complete',db.projects.filter(x=>x.status==='Complete').length]
+  ];
+  document.getElementById('dashDelivery').innerHTML=delivery.map(x=>`<div class="row"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+  document.getElementById('serviceWork').innerHTML=services.map(s=>`<div class="row"><span>${esc(s[1])}</span><b>${db.projects.filter(p=>String(p.services||'').toLowerCase().includes(s[1].split(' ')[0].toLowerCase())).length}</b></div>`).join('');
+  const attention=[];
+  db.invoices.filter(x=>x.status==='Overdue').slice(0,3).forEach(x=>attention.push({text:'Overdue invoice '+x.id+' — '+x.customer,status:'Urgent',page:'payments'}));
+  db.tasks.filter(x=>x.due&&x.due!=='—'&&new Date(x.due+'T23:59:59')<new Date()&&x.status!=='Done').slice(0,3).forEach(x=>attention.push({text:'Task overdue — '+x.name,status:'Due',page:'tasks'}));
+  db.quotes.filter(x=>x.status==='Awaiting').slice(0,3).forEach(x=>attention.push({text:'Quote awaiting response — '+x.customer,status:'Awaiting',page:'quotes'}));
+  db.support.filter(x=>x.status==='Urgent'||x.priority==='Urgent').filter(x=>x.status!=='Closed').slice(0,3).forEach(x=>attention.push({text:'Urgent support — '+x.customer,status:'Urgent',page:'support'}));
+  document.getElementById('todayActions').innerHTML=attention.length?attention.slice(0,6).map(x=>`<div class="row"><span>${esc(x.text)}</span>${statusPill(x.status)}</div>`).join(''):'<div class="empty">No urgent attention items right now.</div>';
+  const activity=[];
+  db.customers.slice(0,3).forEach(x=>activity.push({label:'Customer',text:x.name}));
+  db.consultations.slice(0,3).forEach(x=>activity.push({label:'Consultation',text:x.business}));
+  db.projects.slice(0,3).forEach(x=>activity.push({label:'Project',text:x.name}));
+  db.quotes.slice(0,3).forEach(x=>activity.push({label:'Quote',text:x.id+' — '+x.customer}));
+  db.invoices.slice(0,3).forEach(x=>activity.push({label:'Invoice',text:x.id+' — '+x.customer}));
+  document.getElementById('dashActivity').innerHTML=activity.length?activity.slice(0,8).map(x=>`<div class="row"><span><b>${esc(x.label)}</b> · ${esc(x.text)}</span></div>`).join(''):'<div class="empty">No business activity recorded yet.</div>';
+}
 function renderCustomers(){
   const q=(document.getElementById('customerSearch')?.value||'').toLowerCase();
   const rows=db.customers.filter(x=>(x.name+x.contact+x.industry).toLowerCase().includes(q));
