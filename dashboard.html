@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hetzen Technologies | Business Dashboard</title>
+<meta name="description" content="Hetzen Technologies business operations dashboard.">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="logo.png" alt="Hetzen Technologies logo">
+      <div><strong>Hetzen</strong><span>Business OS</span></div>
+    </div>
+    <nav>
+      <button class="nav-item active" data-view="overview">⌂ <span>Overview</span></button>
+      <button class="nav-item" data-view="clients">◉ <span>Clients</span></button>
+      <button class="nav-item" data-view="leads">◎ <span>Leads</span></button>
+      <button class="nav-item" data-view="quotes">▤ <span>Quotes</span></button>
+      <button class="nav-item" data-view="invoices">▧ <span>Invoices</span></button>
+      <button class="nav-item" data-view="projects">◫ <span>Projects</span></button>
+      <button class="nav-item" data-view="services">◆ <span>Services</span></button>
+      <button class="nav-item" data-view="tasks">✓ <span>Tasks</span></button>
+      <button class="nav-item" data-view="documents">▣ <span>Documents</span></button>
+      <button class="nav-item" data-view="reports">▥ <span>Reports</span></button>
+      <button class="nav-item" data-view="settings">⚙ <span>Settings</span></button>
+    </nav>
+    <div class="side-note"><small>Technology. Digital Solutions. Business Growth.</small></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu" id="menu">☰</button>
+      <div><span class="eyebrow">HETZEN TECHNOLOGIES</span><h1 id="pageTitle">Business Overview</h1></div>
+      <div class="top-actions"><span class="status-dot"></span><span>System ready</span><button id="quickAdd">+ Add</button></div>
+    </header>
+
+    <section class="content" id="content"></section>
+  </main>
+</div>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-card">
+    <button class="close" id="closeModal">×</button>
+    <h2 id="modalTitle">Add record</h2>
+    <form id="recordForm">
+      <input type="hidden" id="recordType">
+      <label>Name / Company<input id="recordName" required></label>
+      <label>Type
+        <select id="recordCategory">
+          <option>Website & Web Development</option><option>AI & Automation</option>
+          <option>Custom Software</option><option>API & System Integration</option>
+          <option>Branding & Digital Identity</option><option>IT / Digital Solutions</option>
+        </select>
+      </label>
+      <label>Status
+        <select id="recordStatus"><option>New</option><option>In Progress</option><option>Quoted</option><option>Active</option><option>Completed</option><option>Paid</option></select>
+      </label>
+      <label>Value (R)<input id="recordValue" type="number" min="0" step="0.01" value="0"></label>
+      <button class="primary" type="submit">Save Record</button>
+    </form>
+  </div>
+</div>
+<script src="dashboard.js"></script>
+</body>
+</html>
