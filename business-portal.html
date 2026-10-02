@@ -531,16 +531,20 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 
   function populateCustomerSelect(id, placeholder){
     const el=document.getElementById(id);
-    if(!el || el.dataset.customerSelectReady==='1') return;
-    const old=el.value||'';
+    if(!el) return;
+    const current=el.value||'';
+    const options='<option value="">'+(placeholder||'Select customer')+'</option>'+db.customers.filter(x=>x.status!=='Archived'&&x.status!=='Deleted').map(x=>'<option value="'+esc(x.name)+'">'+esc(x.name)+(x.contact?' — '+esc(x.contact):'')+'</option>').join('');
+    if(el.tagName==='SELECT'){
+      el.innerHTML=options;
+      if(current && customerByName(current)) el.value=current;
+      return;
+    }
     const select=document.createElement('select');
     select.id=id; select.name=el.name||id; select.required=el.required;
-    select.dataset.customerSelectReady='1';
-    select.innerHTML='<option value="">'+(placeholder||'Select customer')+'</option>'+db.customers.map(x=>'<option value="'+esc(x.name)+'">'+esc(x.name)+(x.contact?' — '+esc(x.contact):'')+'</option>').join('');
-    if(old && customerByName(old)) select.value=old;
+    select.innerHTML=options;
+    if(current && customerByName(current)) select.value=current;
     el.replaceWith(select);
   }
-
   function refreshCustomerSelects(){
     ['qCustomer','iCustomer','dCustomer','pCustomer','sCustomer','rCustomer','coBusiness'].forEach(id=>populateCustomerSelect(id,'Select customer'));
     const task=document.getElementById('tCustomer');
