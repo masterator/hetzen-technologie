@@ -829,7 +829,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 .customer360-item strong{display:block;margin-bottom:3px}.customer360-meta{color:var(--muted);font-size:11px}
 .customer360-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .customer360-empty{color:var(--muted);font-size:12px;padding:8px 0}
-.customer360-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.customer360-edit .full{grid-column:1/-1}
+.customer360-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.customer360-edit .full{grid-column:1/-1}.customer360-timeline{display:grid;gap:8px}.customer360-timeline-item{display:grid;grid-template-columns:90px 1fr;gap:10px;align-items:start;border-left:3px solid var(--gold);padding:8px 0 8px 12px}.customer360-timeline-date{font-size:10px;color:var(--muted);font-weight:700}.customer360-timeline-text{font-size:12px}.customer360-next{background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:11px;font-size:12px}.customer360-next strong{display:block;margin-bottom:4px}@media(max-width:650px){.customer360-timeline-item{grid-template-columns:1fr;gap:3px}}
 @media(max-width:800px){.customer360-grid{grid-template-columns:1fr}.customer360-stats{grid-template-columns:1fr 1fr}}
 </style>
 <script>
@@ -867,6 +867,14 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
     }
     const cons=related('consultations',c.name), projects=related('projects',c.name), quotes=related('quotes',c.name), invoices=related('invoices',c.name), docs=related('documents',c.name), tasks=related('tasks',c.name), support=related('support',c.name);
     const quoted=quotes.reduce((a,x)=>a+Number(x.amount||0),0), invoiced=invoices.reduce((a,x)=>a+Number(x.amount||0),0), paid=invoices.filter(x=>String(x.status||'').toLowerCase()==='paid').reduce((a,x)=>a+Number(x.amount||0),0);
+    const outstanding=Math.max(0,invoiced-paid);
+    const timeline=[];
+    cons.forEach(x=>timeline.push({date:x.date||'Consultation',text:'Consultation saved — '+(x.services||'Discovery')}));
+    quotes.forEach(x=>timeline.push({date:x.id||'Quote',text:'Quotation '+(x.status||'Draft')+' — '+money360(x.amount)}));
+    projects.forEach(x=>timeline.push({date:x.due&&x.due!=='—'?x.due:'Project',text:'Project '+(x.status||'Requirements')+' — '+(x.progress??0)+'%'}));
+    invoices.forEach(x=>timeline.push({date:x.due&&x.due!=='—'?x.due:x.id||'Invoice',text:'Invoice '+(x.status||'Due')+' — '+money360(x.amount)}));
+    support.forEach(x=>timeline.push({date:x.id||'Support',text:'Support '+(x.status||'Open')+' — '+(x.issue||'Request')}));
+    const next=outstanding>0?'Follow up on outstanding invoices.':quotes.some(x=>x.status==='Awaiting')?'Follow up on quotations awaiting a response.':projects.some(x=>x.status!=='Complete')?'Continue the active project workflow.':support.some(x=>x.status!=='Closed')?'Resolve the open support request.':'No immediate financial or delivery action recorded.';
     m.querySelector('.customer360-shell').innerHTML=
       '<div class="customer360-head"><div><h2 id="customer360Title">'+esc360(c.name)+'</h2><p>Customer 360° — one view of the complete business relationship.</p></div><button class="close customer360-close" type="button" aria-label="Close">×</button></div>'+
       '<div class="customer360-stats">'+
@@ -883,7 +891,8 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       '<button class="btn light customer360-quick" type="button" data-kind="quote" data-customer="'+esc360(c.name)+'">New Quote</button>'+
       '<button class="btn light customer360-quick" type="button" data-kind="invoice" data-customer="'+esc360(c.name)+'">New Invoice</button></div></section>'+
       '<section class="customer360-section"><h3>Services</h3><div class="service-list"><span class="service-chip">'+esc360(c.services||'Not assigned')+'</span></div></section>'+
-      '<section class="customer360-section"><h3>Financial Snapshot</h3><div class="customer360-meta">Quoted: '+money360(quoted)+' · Invoiced: '+money360(invoiced)+' · Paid: '+money360(paid)+'</div></section></div>'+
+      '<section class="customer360-section"><h3>Financial Snapshot</h3><div class="customer360-meta">Quoted: '+money360(quoted)+' · Invoiced: '+money360(invoiced)+' · Paid: '+money360(paid)+' · Outstanding: '+money360(outstanding)+'</div></section>'+
+      '<section class="customer360-section"><h3>Next Action</h3><div class="customer360-next"><strong>Recommended operational follow-up</strong>'+esc360(next)+'</div></section></div>'+
       '<div>'+
       '<section class="customer360-section"><h3>Consultations</h3>'+listItems(cons,'consultation')+'</section>'+
       '<section class="customer360-section"><h3>Projects</h3>'+listItems(projects,'project')+'</section>'+
@@ -892,6 +901,11 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       '<section class="customer360-section"><h3>Documents</h3>'+listItems(docs,'document')+'</section>'+
       '<section class="customer360-section"><h3>Tasks</h3>'+listItems(tasks,'task')+'</section>'+
       '<section class="customer360-section"><h3>Support</h3>'+listItems(support,'support')+'</section>'+
+      '<section class="customer360-section"><h3>Customer Timeline</h3>'+(
+        timeline.length
+          ? '<div class="customer360-timeline">'+timeline.slice(-15).reverse().map(x=>'<div class="customer360-timeline-item"><div class="customer360-timeline-date">'+esc360(x.date)+'</div><div class="customer360-timeline-text">'+esc360(x.text)+'</div></div>').join('')+'</div>'
+          : '<div class="customer360-empty">No lifecycle activity recorded yet.</div>'
+      )+'</section>'+
       '</div></div>';
     m.classList.add('open');
   }
