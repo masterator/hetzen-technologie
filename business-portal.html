@@ -184,7 +184,23 @@ async function confirmStartFresh(){const code=(document.getElementById('startFre
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function money(n){return 'R'+Number(n||0).toLocaleString('en-ZA')}
 function statusPill(s){const v=String(s);let c=v==='Paid'||v==='Complete'||v==='Active'||v==='Ready'||v==='On'?'green':v==='Overdue'||v==='Urgent'||v==='Lost'?'red':v==='Due'||v==='Awaiting'||v==='Requirements'||v==='Draft'?'gold':'blue';return `<span class="pill ${c}">${esc(v)}</span>`}
 function renderDashboard(){document.getElementById('dashCards').innerHTML=[['Active Customers',db.customers.length,'Central customer records'],['Open Projects',db.projects.filter(x=>x.status!=='Complete').length,'Across all service types'],['Quotes Awaiting',db.quotes.filter(x=>x.status==='Awaiting').length,'Need follow-up'],['Open Support',db.support.filter(x=>x.status!=='Closed').length,'Post-handover work']].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');document.getElementById('serviceWork').innerHTML=services.map(s=>`<div class="row"><span>${s[1]}</span><b>${db.projects.filter(p=>p.services.toLowerCase().includes(s[1].split(' ')[0].toLowerCase())).length}</b></div>`).join('');document.getElementById('todayActions').innerHTML=db.tasks.slice(0,4).map(t=>`<div class="row"><span>${esc(t.name)}</span>${statusPill(t.status)}</div>`).join('')}
-function renderCustomers(){const q=(document.getElementById('customerSearch')?.value||'').toLowerCase();document.getElementById('customerRows').innerHTML=db.customers.filter(x=>(x.name+x.contact+x.industry).toLowerCase().includes(q)).map((x,i)=>`<tr><td><b>${esc(x.name)}</b><div class="mini-stat">${esc(x.industry)}</div></td><td>${esc(x.contact)}<div class="mini-stat">${esc(x.phone)}</div></td><td><div class="service-list"><span class="service-chip">${esc(x.services)}</span></div></td><td>${x.projects}</td><td>${statusPill(x.status)}</td><td><button class="btn light" onclick="startCustomerConsult('${esc(x.name)}')">Consult</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No customers found.</td></tr>'}
+function renderCustomers(){
+  const q=(document.getElementById('customerSearch')?.value||'').toLowerCase();
+  const rows=db.customers.filter(x=>(x.name+x.contact+x.industry).toLowerCase().includes(q));
+  document.getElementById('customerRows').innerHTML=rows.map((x)=>{
+    const name=esc(x.name);
+    const archived=x.status==='Archived';
+    return '<tr><td><b>'+name+'</b><div class="mini-stat">'+esc(x.industry)+'</div></td><td>'+esc(x.contact)+'<div class="mini-stat">'+esc(x.phone)+'</div></td><td><div class="service-list"><span class="service-chip">'+esc(x.services)+'</span></div></td><td>'+x.projects+'</td><td>'+statusPill(x.status)+'</td><td class="customer-actions">'+
+      '<button class="btn light" type="button" onclick="startCustomerConsult('+JSON.stringify(x.name)+')">Consult</button>'+
+      '<button class="btn light" type="button" onclick="openCustomerQuote('+JSON.stringify(x.name)+')">Quote</button>'+
+      '<button class="btn light" type="button" onclick="openCustomerInvoice('+JSON.stringify(x.name)+')">Invoice</button>'+
+      (archived
+        ? '<button class="btn light" type="button" onclick="restoreCustomer('+JSON.stringify(x.name)+')">Restore</button>'
+        : '<button class="btn light" type="button" onclick="archiveCustomer('+JSON.stringify(x.name)+')">Archive</button>')+
+      '<button class="btn danger" type="button" onclick="deleteCustomer('+JSON.stringify(x.name)+')">Delete</button>'+
+      '</td></tr>';
+  }).join('')||'<tr><td colspan="6" class="empty">No customers found.</td></tr>';
+}
 function renderLeads(){const q=(document.getElementById('leadSearch')?.value||'').toLowerCase();document.getElementById('leadRows').innerHTML=db.leads.filter(x=>(x.name+x.need+x.source).toLowerCase().includes(q)).map((x,i)=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.source)}</td><td>${esc(x.need)}</td><td>${statusPill(x.stage)}</td><td>${esc(x.action)}</td><td><button class="btn light" onclick="leadToConsult(${i})">Consult</button></td></tr>`).join('')}
 function renderConsultations(){document.getElementById('consultRows').innerHTML=db.consultations.map((x,i)=>`<div class="row"><div><b>${esc(x.business)}</b><div class="mini-stat">${esc(x.services)} · ${esc(x.date)}</div></div><div class="pdf-actions"><button class="btn light" onclick="generateServicePDF(${i})">Service Report PDF</button>${statusPill(x.status)}</div></div>`).join('')}
 function renderServices(){document.getElementById('serviceCatalogue').innerHTML=services.map(s=>`<div class="service"><b>${s[1]}</b><p>${s[2]}</p><button class="btn light" style="margin-top:12px" onclick="openConsultationForService('${s[0]}')">Use this service</button></div>`).join('')}
@@ -604,18 +620,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
     c.status='Active'; delete c.archivedAt; persist(); toast('Customer restored');
   };
 
-  function enrichCustomerRows(){
-    const rows=[...document.querySelectorAll('#customerRows tr')];
-    rows.forEach(row=>{
-      if(row.dataset.workflowActions==='1') return;
-      const first=row.querySelector('td'); const action=row.querySelector('td:last-child');
-      if(!first||!action||!first.querySelector('b')) return;
-      const name=first.querySelector('b').textContent.trim();
-      if(!customerByName(name)) return;
-      action.insertAdjacentHTML('beforeend',' <button class="btn light" type="button" onclick="openCustomerQuote('+JSON.stringify(name)+')">Quote</button><button class="btn light" type="button" onclick="openCustomerInvoice('+JSON.stringify(name)+')">Invoice</button><button class="btn light" type="button" onclick="archiveCustomer('+JSON.stringify(name)+')">Archive</button><button class="btn danger" type="button" onclick="deleteCustomer('+JSON.stringify(name)+')">Delete</button>');
-      row.dataset.workflowActions='1';
-    });
-  }
+  function enrichCustomerRows(){ return; }
 
   const originalRenderCustomers=window.renderCustomers;
   window.renderCustomers=function(){ originalRenderCustomers(); enrichCustomerRows(); refreshCustomerSelects(); };
