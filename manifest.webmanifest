@@ -9,6 +9,6 @@
   "theme_color": "#11110f",
   "orientation": "any",
   "icons": [
-    {"src":"hetzen-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"logo.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
