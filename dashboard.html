@@ -6,9 +6,12 @@
 <title>Hetzen Technologies | Business Dashboard</title>
 <meta name="description" content="Hetzen Technologies business operations dashboard.">
 <link rel="stylesheet" href="dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 </head>
 <body>
-<div class="app">
+<div id="loginScreen" class="modal"><div class="modal-card"><h2>Hetzen Business OS</h2><p>Sign in to access your business dashboard.</p><form id="loginForm"><label>Email<input id="loginEmail" type="email" required></label><label>Password<input id="loginPassword" type="password" required></label><button class="primary" type="submit">Sign in</button><p id="loginError" class="danger-note"></p></form></div></div>
+<div class="app" id="appShell" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img src="logo.png" alt="Hetzen Technologies logo">
@@ -34,7 +37,7 @@
     <header class="topbar">
       <button class="menu" id="menu">☰</button>
       <div><span class="eyebrow">HETZEN TECHNOLOGIES</span><h1 id="pageTitle">Business Overview</h1></div>
-      <div class="top-actions"><span class="status-dot"></span><span>System ready</span><button id="quickAdd">+ Add</button></div>
+      <div class="top-actions"><span class="status-dot"></span><span>System ready</span><button id="quickAdd">+ Add</button><button id="logoutBtn" class="ghost">Log out</button></div>
     </header>
 
     <section class="content" id="content"></section>
