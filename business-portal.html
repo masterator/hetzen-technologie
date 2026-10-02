@@ -787,4 +787,66 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 })();
 </script>
 
+<script>
+/* HETZEN CUSTOMER ACTION BRIDGE — independent fallback */
+(function(){
+  function customerByNameSafe(name){
+    return (window.db?.customers||[]).find(x=>String(x.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());
+  }
+  window.openCustomerQuote=function(name){
+    const modal=document.getElementById('quoteModal');
+    if(!modal) return;
+    modal.classList.add('open');
+    setTimeout(function(){
+      if(window.refreshCustomerSelects) window.refreshCustomerSelects();
+      const el=document.getElementById('qCustomer');
+      if(el) el.value=name||'';
+    },0);
+  };
+  window.openCustomerInvoice=function(name){
+    const modal=document.getElementById('invoiceModal');
+    if(!modal) return;
+    modal.classList.add('open');
+    setTimeout(function(){
+      if(window.refreshCustomerSelects) window.refreshCustomerSelects();
+      const el=document.getElementById('iCustomer');
+      if(el) el.value=name||'';
+    },0);
+  };
+  window.archiveCustomer=function(name){
+    const c=customerByNameSafe(name);
+    if(!c) return;
+    if(!window.confirm('Archive '+c.name+'? Its history will be kept, but it will no longer appear in new customer selectors.')) return;
+    c.status='Archived';
+    c.archivedAt=new Date().toISOString();
+    if(window.persist) window.persist();
+    if(window.toast) window.toast('Customer archived');
+  };
+  window.restoreCustomer=function(name){
+    const c=customerByNameSafe(name);
+    if(!c) return;
+    c.status='Active';
+    delete c.archivedAt;
+    if(window.persist) window.persist();
+    if(window.toast) window.toast('Customer restored');
+  };
+  window.deleteCustomer=function(name){
+    const c=customerByNameSafe(name);
+    if(!c) return;
+    const linked=['consultations','projects','quotes','invoices','documents','tasks','support'].some(function(k){
+      return (window.db?.[k]||[]).some(function(x){
+        return String(x.customer||x.business||'').toLowerCase()===String(c.name||'').toLowerCase();
+      });
+    });
+    if(linked){
+      if(window.toast) window.toast('Customer has linked records. Archive it instead of deleting.');
+      return;
+    }
+    if(!window.confirm('Permanently delete '+c.name+'? This cannot be undone.')) return;
+    window.db.customers=window.db.customers.filter(function(x){return x!==c;});
+    if(window.persist) window.persist();
+    if(window.toast) window.toast('Customer deleted');
+  };
+})();
+</script>
 </body></html>
