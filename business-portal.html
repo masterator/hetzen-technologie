@@ -570,4 +570,179 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
   document.addEventListener('click',handleCustomerAction);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(renderCustomerActions,0));
 })();</script>
+<script>
+/* HETZEN AUTOMATION ENGINE — linked customer lifecycle */
+(function(){
+  const RULES=[
+    {key:'customer_onboarding',trigger:'New customer',action:'Create onboarding project and task'},
+    {key:'consultation_to_project',trigger:'Consultation saved',action:'Create project and requirements task'},
+    {key:'quote_accepted',trigger:'Quote accepted',action:'Create project, deposit invoice and tasks'},
+    {key:'project_handover',trigger:'Project handover',action:'Create final-invoice task'},
+    {key:'project_complete',trigger:'Project complete',action:'Create balance invoice when project has a quoted amount'},
+    {key:'invoice_paid',trigger:'Invoice paid',action:'Record payment task and advance linked project'}
+  ];
+  function clean(v){return String(v||'').trim()}
+  function same(a,b){return clean(a).toLowerCase()===clean(b).toLowerCase()}
+  function customer(name){return db.customers.find(c=>same(c.name,name))}
+  function projectFor(name,key){return db.projects.find(p=>same(p.customer,name)&&(key?p.automationKey===key:true))}
+  function taskExists(key){return db.tasks.some(t=>t.automationKey===key)}
+  function invoiceExists(key){return db.invoices.some(x=>x.automationKey===key)}
+  function addTaskOnce(name,customerName,key){
+    if(taskExists(key))return false;
+    db.tasks.unshift({name,due:'—',status:'To do',customer:customerName||'',automationKey:key});
+    return true;
+  }
+  function addProjectOnce(name,customerName,services,amount,key){
+    let p=projectFor(customerName,key);
+    if(p)return p;
+    p={name,customer:customerName,services:services||'General',status:'Requirements',due:'—',progress:10,amount:Number(amount)||0,automationKey:key};
+    db.projects.unshift(p);
+    const c=customer(customerName); if(c)c.projects=Number(c.projects||0)+1;
+    return p;
+  }
+  function addInvoiceOnce(customerName,amount,status,key,projectId){
+    if(invoiceExists(key))return null;
+    const inv={id:'INV-'+(19+db.invoices.length),customer:customerName,amount:Number(amount)||0,due:'—',status:status||'Due',automationKey:key,projectId:projectId||''};
+    db.invoices.unshift(inv); return inv;
+  }
+  function ensureRules(){
+    db.automations=db.automations||[];
+    RULES.forEach(r=>{
+      if(!db.automations.some(a=>a.systemKey===r.key))
+        db.automations.push({trigger:r.trigger,action:r.action,review:'No',status:'On',systemKey:r.key,system:true});
+    });
+  }
+  function save(){persist()}
+  function ensureCustomerOnboarding(name){
+    const key='customer-onboarding:'+clean(name).toLowerCase();
+    addProjectOnce('Customer onboarding — '+name,name,'General business onboarding',0,key);
+    addTaskOnce('Review new customer and confirm requirements',name,key+':task');
+  }
+  const originalAddCustomer=window.addCustomer;
+  if(typeof originalAddCustomer==='function'){
+    window.addCustomer=function(e){
+      originalAddCustomer(e);
+      const name=clean(document.getElementById('cName')?.value);
+      /* original handler resets the form, so recover the newest customer */
+      const c=db.customers[0];
+      if(c){ensureCustomerOnboarding(c.name);ensureRules();save();toast('Customer added — onboarding started')}
+    };
+  }
+  const originalConsult=window.saveConsultation;
+  if(typeof originalConsult==='function'){
+    window.saveConsultation=function(e){
+      const business=clean(document.getElementById('coBusiness')?.value);
+      const contact=clean(document.getElementById('coContact')?.value);
+      const phone=clean(document.getElementById('coPhone')?.value);
+      const industry=clean(document.getElementById('coIndustry')?.value);
+      const before=db.consultations.length;
+      originalConsult(e);
+      if(db.consultations.length>before){
+        let c=customer(business);
+        if(!c){
+          c={name:business,contact:contact||'—',phone:phone||'—',email:'',industry:industry||'—',services:db.consultations[0].services||'Not assigned',projects:0,status:'Active'};
+          db.customers.unshift(c);
+        }
+        const con=db.consultations[0];
+        const key='consultation-project:'+business.toLowerCase()+':'+clean(con.date);
+        const p=addProjectOnce('Project — '+business,business,con.services,0,key);
+        con.customer=business; con.projectId=p&&p.automationKey||key;
+        addTaskOnce('Review consultation requirements and prepare scope',business,key+':task');
+        ensureRules();save();toast('Consultation saved — project workflow started');
+      }
+    };
+  }
+  const originalAddQuote=window.addQuote;
+  if(typeof originalAddQuote==='function'){
+    window.addQuote=function(e){
+      const customerName=clean(document.getElementById('qCustomer')?.value);
+      const service=clean(document.getElementById('qService')?.value);
+      const amount=Number(document.getElementById('qAmount')?.value)||0;
+      const status=clean(document.getElementById('qStatus')?.value);
+      originalAddQuote(e);
+      const q=db.quotes[0];
+      if(q && q.customer===customerName && q.status===status){
+        if(status==='Accepted') acceptQuote(q);
+        ensureRules();save();
+      }
+    };
+  }
+  function acceptQuote(q){
+    const key='quote-accepted:'+clean(q.id);
+    const p=addProjectOnce('Project — '+q.customer,q.customer,q.items,q.amount,key);
+    q.projectId=p&&p.automationKey||key;
+    addTaskOnce('Start project — '+q.items,q.customer,key+':start');
+    addTaskOnce('Confirm customer requirements and project scope',q.customer,key+':scope');
+    const deposit=Math.round(Number(q.amount||0)*0.5*100)/100;
+    if(deposit>0)addInvoiceOnce(q.customer,deposit,'Due',key+':deposit',p&&p.automationKey);
+  }
+  const originalCycleQuote=window.cycleQuote;
+  if(typeof originalCycleQuote==='function'){
+    window.cycleQuote=function(i){
+      const before=db.quotes[i]?.status;
+      originalCycleQuote(i);
+      const q=db.quotes[i];
+      if(q && before!=='Accepted' && q.status==='Accepted')acceptQuote(q);
+      ensureRules();save();
+      if(q && before!=='Accepted' && q.status==='Accepted')toast('Quote accepted — project and deposit workflow started');
+    };
+  }
+  const originalAddProject=window.addProject;
+  if(typeof originalAddProject==='function'){
+    window.addProject=function(e){
+      const customerName=clean(document.getElementById('pCustomer')?.value);
+      const service=clean(document.getElementById('pServices')?.value);
+      originalAddProject(e);
+      const p=db.projects[0];
+      if(p && same(p.customer,customerName)){
+        addTaskOnce('Confirm requirements and project scope',customerName,'manual-project:'+clean(p.name).toLowerCase()+':scope');
+        ensureRules();save();
+      }
+    };
+  }
+  const originalAdvance=window.advanceProject;
+  if(typeof originalAdvance==='function'){
+    window.advanceProject=function(i){
+      const p=db.projects[i]; const before=p&&p.status;
+      originalAdvance(i);
+      const now=db.projects[i];
+      if(!now)return;
+      if(before!=='Handover' && now.status==='Handover'){
+        addTaskOnce('Prepare handover and final invoice',now.customer,'handover:'+clean(now.name).toLowerCase());
+      }
+      if(before!=='Complete' && now.status==='Complete'){
+        const key='project-complete:'+clean(now.name).toLowerCase();
+        if(Number(now.amount)>0){
+          const paidDeposit=db.invoices.filter(x=>same(x.customer,now.customer)&&x.projectId===now.automationKey).reduce((a,x)=>a+Number(x.amount||0),0);
+          const balance=Math.max(0,Number(now.amount)-paidDeposit);
+          if(balance>0)addInvoiceOnce(now.customer,balance,'Due',key+':balance',now.automationKey);
+        }else{
+          addTaskOnce('Create final invoice for completed project',now.customer,key+':invoice');
+        }
+        addTaskOnce('Confirm handover and customer sign-off',now.customer,key+':handover');
+      }
+      ensureRules();save();
+    };
+  }
+  const originalCycleInvoice=window.cycleInvoice;
+  if(typeof originalCycleInvoice==='function'){
+    window.cycleInvoice=function(i){
+      const before=db.invoices[i]?.status;
+      originalCycleInvoice(i);
+      const inv=db.invoices[i];
+      if(inv && before!=='Paid' && inv.status==='Paid'){
+        addTaskOnce('Payment received — update customer/project records',inv.customer,'payment:'+clean(inv.id));
+        if(inv.projectId){
+          const p=db.projects.find(x=>x.automationKey===inv.projectId);
+          if(p && p.status!=='Complete' && Number(p.progress)>=80)p.status='Complete';
+        }
+      }
+      ensureRules();save();
+    };
+  }
+  const originalInit=window.init;
+  window.hetzenAutomationReady=true;
+  setTimeout(function(){ensureRules();try{persist()}catch(e){}},0);
+})();
+</script>
 </body></html>
