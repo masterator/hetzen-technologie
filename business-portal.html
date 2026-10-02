@@ -159,13 +159,13 @@ const serviceQuestions={web:['Website type','Pages / sections','Products or serv
 const titles={dashboard:'Business Dashboard',customers:'Customers',leads:'Leads & Enquiries',consultations:'Consultations',services:'Services',projects:'Projects',quotes:'Quotations',payments:'Invoices & Payments',documents:'Documents',tasks:'Tasks',support:'Support',reports:'Reports',forms:'Forms',automations:'Automations',settings:'Settings'};
 const seed={customers:[],leads:[],consultations:[],projects:[],quotes:[],invoices:[],documents:[],tasks:[],support:[],forms:[],automations:[]};
 const DATA_KEY='hetzenBusinessDataV2';
-const SYNTHETIC_NAMES=['Example Trading','Future Foods','BuildPro SA','New Salon','Local Retailer'];
+const SYNTHETIC_NAMES=[];
 function sanitizeData(input){
   const empty={customers:[],leads:[],consultations:[],projects:[],quotes:[],invoices:[],documents:[],tasks:[],support:[],forms:[],automations:[]};
   const out={...empty,...(input||{})};
   const isSynthetic=(value)=>{
     const s=String(value||'').toLowerCase();
-    return SYNTHETIC_NAMES.some(n=>s.includes(n.toLowerCase()))||/example\\.co\\.za|072 000 0000|073 000 0000|074 000 0000/.test(s);
+    return /example\\.co\\.za|000 0000|sample|demo|fake|placeholder/i.test(s);
   };
   Object.keys(empty).forEach(k=>{
     if(!Array.isArray(out[k])) out[k]=[];
