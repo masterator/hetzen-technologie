@@ -816,6 +816,88 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 })();
 </script>
 
+<script>
+/* HETZEN WORKFLOW LINKS V2 — lead to customer to delivery, additive and idempotent */
+(function(){
+  const clean=v=>String(v||'').trim();
+  const same=(a,b)=>clean(a).toLowerCase()===clean(b).toLowerCase();
+  function currentLead(name){return (db.leads||[]).find(l=>same(l.name,name)&&l.stage!=='Lost')}
+  function currentProject(name){return (db.projects||[]).find(p=>same(p.customer,name)&&p.status!=='Complete')}
+  function addLink(key,obj){
+    if(!obj||obj.workflowKey)return;
+    obj.workflowKey=key;
+  }
+  const baseLeadToConsult=window.leadToConsult;
+  window.leadToConsult=function(i){
+    const lead=db.leads?.[i];
+    if(lead){
+      window.hetzenPendingLead={name:lead.name,index:i,need:lead.need||'',id:lead.id||('LEAD-'+i)};
+      lead.stage=lead.stage==='New'?'Discovery':lead.stage;
+      lead.action='Consultation in progress';
+      if(typeof persist==='function')persist();
+    }
+    if(typeof baseLeadToConsult==='function')baseLeadToConsult(i);
+  };
+  const baseSaveConsult=window.saveConsultation;
+  window.saveConsultation=function(e){
+    const pending=window.hetzenPendingLead;
+    const business=clean(document.getElementById('coBusiness')?.value);
+    if(typeof baseSaveConsult==='function')baseSaveConsult(e);
+    if(!business)return;
+    const con=db.consultations?.[0];
+    if(con){
+      const lead=pending&&same(pending.name,business)?currentLead(business):null;
+      if(lead){
+        con.leadId=lead.id||pending.id;
+        lead.stage='Quote';
+        lead.action='Prepare quotation';
+        addLink('lead:'+String(con.leadId).toLowerCase(),con);
+      }
+    }
+    window.hetzenPendingLead=null;
+    if(typeof persist==='function')persist();
+  };
+  const baseAddQuote=window.addQuote;
+  window.addQuote=function(e){
+    const customer=clean(document.getElementById('qCustomer')?.value);
+    if(typeof baseAddQuote==='function')baseAddQuote(e);
+    const q=db.quotes?.[0];
+    if(q&&same(q.customer,customer)){
+      const lead=currentLead(customer);
+      if(lead){q.leadId=lead.id||('LEAD-'+db.leads.indexOf(lead));lead.stage='Quote';lead.action='Awaiting customer response'}
+      const p=currentProject(customer);
+      if(p)q.projectId=p.automationKey||p.workflowKey||'';
+    }
+    if(typeof persist==='function')persist();
+  };
+  const baseAddInvoice=window.addInvoice;
+  window.addInvoice=function(e){
+    const customer=clean(document.getElementById('iCustomer')?.value);
+    if(typeof baseAddInvoice==='function')baseAddInvoice(e);
+    const inv=db.invoices?.[0];
+    if(inv&&same(inv.customer,customer)){
+      const p=currentProject(customer);
+      if(p)inv.projectId=inv.projectId||p.automationKey||p.workflowKey||'';
+      const q=[...(db.quotes||[])].find(x=>same(x.customer,customer)&&x.status==='Accepted');
+      if(q)inv.quoteId=inv.quoteId||q.id||'';
+    }
+    if(typeof persist==='function')persist();
+  };
+  const baseAddProject=window.addProject;
+  window.addProject=function(e){
+    const customer=clean(document.getElementById('pCustomer')?.value);
+    if(typeof baseAddProject==='function')baseAddProject(e);
+    const p=db.projects?.[0];
+    if(p&&same(p.customer,customer)){
+      const q=[...(db.quotes||[])].find(x=>same(x.customer,customer)&&x.status==='Accepted');
+      if(q)p.quoteId=p.quoteId||q.id||'';
+      const lead=currentLead(customer);
+      if(lead)p.leadId=p.leadId||lead.id||('LEAD-'+db.leads.indexOf(lead));
+    }
+    if(typeof persist==='function')persist();
+  };
+})();
+</script>
 <style id="customer360Styles">
 .customer360-shell{width:min(1180px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 25px 90px rgba(0,0,0,.35);padding:22px}
 .customer360-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:16px}
