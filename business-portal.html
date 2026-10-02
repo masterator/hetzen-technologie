@@ -746,4 +746,126 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
   setTimeout(function(){ensureRules();try{persist()}catch(e){}},0);
 })();
 </script>
+
+<style id="customer360Styles">
+.customer360-shell{width:min(1180px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 25px 90px rgba(0,0,0,.35);padding:22px}
+.customer360-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:16px}
+.customer360-head h2{margin:0 0 5px}.customer360-head p{margin:0;color:var(--muted);font-size:12px}
+.customer360-grid{display:grid;grid-template-columns:1.1fr 2fr;gap:16px}
+.customer360-section{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:14px}
+.customer360-section h3{margin:0 0 11px;font-size:14px}
+.customer360-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.customer360-stat{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px}.customer360-stat b{display:block;font-size:20px}.customer360-stat span{font-size:10px;color:var(--muted)}
+.customer360-list{display:grid;gap:7px}.customer360-item{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px;font-size:12px}
+.customer360-item strong{display:block;margin-bottom:3px}.customer360-meta{color:var(--muted);font-size:11px}
+.customer360-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.customer360-empty{color:var(--muted);font-size:12px;padding:8px 0}
+.customer360-edit{display:grid;grid-template-columns:1fr 1fr;gap:10px}.customer360-edit .full{grid-column:1/-1}
+@media(max-width:800px){.customer360-grid{grid-template-columns:1fr}.customer360-stats{grid-template-columns:1fr 1fr}}
+</style>
+<script>
+/* HETZEN CUSTOMER 360 — event-delegated, linked records, no inline handlers */
+(function(){
+  function findCustomer(name){
+    return Array.isArray(db.customers)?db.customers.find(c=>String(c.name||'').toLowerCase()===String(name||'').toLowerCase()):null;
+  }
+  function esc360(v){return typeof esc==='function'?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function money360(v){return typeof money==='function'?money(v):'R '+Number(v||0).toFixed(2)}
+  function related(key,name){
+    return (Array.isArray(db[key])?db[key]:[]).filter(x=>String(x.customer||x.business||'').toLowerCase()===String(name||'').toLowerCase());
+  }
+  function listItems(items,type){
+    if(!items.length)return '<div class="customer360-empty">No records yet.</div>';
+    return '<div class="customer360-list">'+items.slice(0,12).map(x=>{
+      let title=x.name||x.id||type, meta='';
+      if(type==='consultation')meta=(x.date||'')+' • '+(x.status||'Saved');
+      if(type==='project')meta=(x.status||'')+' • '+(x.progress??0)+'%';
+      if(type==='quote')meta=(x.id||'')+' • '+money360(x.amount)+' • '+(x.status||'');
+      if(type==='invoice')meta=(x.id||'')+' • '+money360(x.amount)+' • '+(x.status||'');
+      if(type==='document')meta=(x.name||x.type||'Document')+' • '+(x.date||'');
+      if(type==='task')meta=(x.due||'')+' • '+(x.status||'');
+      if(type==='support')meta=(x.subject||x.name||'Support')+' • '+(x.status||'');
+      return '<div class="customer360-item"><strong>'+esc360(title)+'</strong><div class="customer360-meta">'+esc360(meta)+'</div></div>';
+    }).join('')+'</div>';
+  }
+  function open360(name){
+    const c=findCustomer(name); if(!c){if(typeof toast==='function')toast('Customer not found');return;}
+    let m=document.getElementById('customer360Modal');
+    if(!m){
+      m=document.createElement('div');m.id='customer360Modal';m.className='modal';
+      m.innerHTML='<div class="customer360-shell" role="dialog" aria-modal="true" aria-labelledby="customer360Title"></div>';
+      document.body.appendChild(m);
+    }
+    const cons=related('consultations',c.name), projects=related('projects',c.name), quotes=related('quotes',c.name), invoices=related('invoices',c.name), docs=related('documents',c.name), tasks=related('tasks',c.name), support=related('support',c.name);
+    const quoted=quotes.reduce((a,x)=>a+Number(x.amount||0),0), invoiced=invoices.reduce((a,x)=>a+Number(x.amount||0),0), paid=invoices.filter(x=>String(x.status||'').toLowerCase()==='paid').reduce((a,x)=>a+Number(x.amount||0),0);
+    m.querySelector('.customer360-shell').innerHTML=
+      '<div class="customer360-head"><div><h2 id="customer360Title">'+esc360(c.name)+'</h2><p>Customer 360° — one view of the complete business relationship.</p></div><button class="close customer360-close" type="button" aria-label="Close">×</button></div>'+
+      '<div class="customer360-stats">'+
+      '<div class="customer360-stat"><b>'+cons.length+'</b><span>Consultations</span></div><div class="customer360-stat"><b>'+projects.length+'</b><span>Projects</span></div><div class="customer360-stat"><b>'+quotes.length+'</b><span>Quotes</span></div><div class="customer360-stat"><b>'+invoices.length+'</b><span>Invoices</span></div></div>'+
+      '<div class="customer360-grid" style="margin-top:14px">'+
+      '<div><section class="customer360-section"><h3>Customer Information</h3><div class="customer360-edit">'+
+      '<div class="field"><label>Business / Customer</label><input id="c360Name" value="'+esc360(c.name)+'"></div>'+
+      '<div class="field"><label>Contact Person</label><input id="c360Contact" value="'+esc360(c.contact||'')+'"></div>'+
+      '<div class="field"><label>Phone</label><input id="c360Phone" value="'+esc360(c.phone||'')+'"></div>'+
+      '<div class="field"><label>Email</label><input id="c360Email" value="'+esc360(c.email||'')+'"></div>'+
+      '<div class="field full"><label>Industry</label><input id="c360Industry" value="'+esc360(c.industry||'')+'"></div>'+
+      '</div><div class="customer360-actions"><button class="btn gold customer360-save" type="button" data-original="'+esc360(c.name)+'">Save Customer</button>'+
+      '<button class="btn light customer360-quick" type="button" data-kind="consult" data-customer="'+esc360(c.name)+'">New Consultation</button>'+
+      '<button class="btn light customer360-quick" type="button" data-kind="quote" data-customer="'+esc360(c.name)+'">New Quote</button>'+
+      '<button class="btn light customer360-quick" type="button" data-kind="invoice" data-customer="'+esc360(c.name)+'">New Invoice</button></div></section>'+
+      '<section class="customer360-section"><h3>Services</h3><div class="service-list"><span class="service-chip">'+esc360(c.services||'Not assigned')+'</span></div></section>'+
+      '<section class="customer360-section"><h3>Financial Snapshot</h3><div class="customer360-meta">Quoted: '+money360(quoted)+' · Invoiced: '+money360(invoiced)+' · Paid: '+money360(paid)+'</div></section></div>'+
+      '<div>'+
+      '<section class="customer360-section"><h3>Consultations</h3>'+listItems(cons,'consultation')+'</section>'+
+      '<section class="customer360-section"><h3>Projects</h3>'+listItems(projects,'project')+'</section>'+
+      '<section class="customer360-section"><h3>Quotations</h3>'+listItems(quotes,'quote')+'</section>'+
+      '<section class="customer360-section"><h3>Invoices & Payments</h3>'+listItems(invoices,'invoice')+'</section>'+
+      '<section class="customer360-section"><h3>Documents</h3>'+listItems(docs,'document')+'</section>'+
+      '<section class="customer360-section"><h3>Tasks</h3>'+listItems(tasks,'task')+'</section>'+
+      '<section class="customer360-section"><h3>Support</h3>'+listItems(support,'support')+'</section>'+
+      '</div></div>';
+    m.classList.add('open');
+  }
+  function save360(btn){
+    const oldName=btn.dataset.original||'', c=findCustomer(oldName); if(!c)return;
+    const newName=document.getElementById('c360Name')?.value.trim()||oldName;
+    if(!newName){toast('Customer name is required');return}
+    const fields={contact:'c360Contact',phone:'c360Phone',email:'c360Email',industry:'c360Industry'};
+    c.name=newName;Object.keys(fields).forEach(k=>c[k]=document.getElementById(fields[k])?.value.trim()||'');
+    ['consultations','projects','quotes','invoices','documents','tasks','support'].forEach(k=>{
+      (db[k]||[]).forEach(x=>{if(String(x.customer||x.business||'').toLowerCase()===oldName.toLowerCase()){if(x.customer!==undefined)x.customer=newName;if(x.business!==undefined)x.business=newName;}});
+    });
+    if(typeof persist==='function')persist(); if(typeof refreshCustomerSelects==='function')refreshCustomerSelects();
+    document.getElementById('customer360Modal')?.classList.remove('open'); if(typeof toast==='function')toast('Customer 360 updated');
+  }
+  function close360(){document.getElementById('customer360Modal')?.classList.remove('open')}
+  function quick(kind,name){
+    close360();
+    if(kind==='consult'&&typeof startCustomerConsult==='function')startCustomerConsult(name);
+    else if(kind==='quote'&&typeof openCustomerQuote==='function')openCustomerQuote(name);
+    else if(kind==='invoice'&&typeof openCustomerInvoice==='function')openCustomerInvoice(name);
+  }
+  function inject(){
+    const body=document.getElementById('customerRows'); if(!body)return;
+    body.querySelectorAll('.customer-actions').forEach(cell=>{
+      if(cell.querySelector('.customer360-view'))return;
+      const action=cell.querySelector('.customer-action[data-action="consult"]'); if(!action)return;
+      const b=document.createElement('button');b.className='btn light customer-action customer360-view';b.type='button';b.dataset.action='view360';b.dataset.customer=action.dataset.customer;b.textContent='View';
+      cell.insertBefore(b,cell.firstChild);
+    });
+  }
+  const oldRender=window.renderCustomers;
+  window.renderCustomers=function(){if(typeof oldRender==='function')oldRender();inject()};
+  document.addEventListener('click',function(e){
+    const v=e.target.closest('.customer360-view'); if(v){open360(v.dataset.customer);return}
+    const close=e.target.closest('.customer360-close'); if(close){close360();return}
+    const save=e.target.closest('.customer360-save'); if(save){save360(save);return}
+    const q=e.target.closest('.customer360-quick'); if(q){quick(q.dataset.kind,q.dataset.customer);return}
+    if(e.target.id==='customer360Modal')close360();
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close360()});
+  window.openCustomer360=open360;
+  setTimeout(inject,0);
+})();
+</script>
 </body></html>
