@@ -766,6 +766,11 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
     persist(); e.target.reset(); closeModal('taskModal'); toast('Task added');
   };
 
+  window.cancelConsultation=function(i){ if(!confirm('Cancel this consultation?'))return; if(db.consultations[i]){db.consultations[i].status='Cancelled';persist();toast('Consultation cancelled')} };
+  window.cancelProject=function(i){ if(!confirm('Cancel this project?'))return; if(db.projects[i]){db.projects[i].status='Cancelled';persist();toast('Project cancelled')} };
+  window.cancelQuote=function(i){ if(!confirm('Cancel this quote?'))return; if(db.quotes[i]){db.quotes[i].status='Cancelled';persist();toast('Quote cancelled')} };
+  window.voidInvoice=function(i){ if(!confirm('Void this invoice?'))return; if(db.invoices[i]){db.invoices[i].status='Voided';persist();toast('Invoice voided')} };
+
   function setup(){
     addCustomerServiceField();
     addTaskCustomerField();
