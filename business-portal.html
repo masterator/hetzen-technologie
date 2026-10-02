@@ -478,375 +478,81 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 })();
 </script>
 
-<script>
-/* HETZEN WORKFLOW AUTOMATION V1 — customer-linked workflow engine */
-(function(){
-  const FLOW_VERSION='1';
 
-  function today(){ return new Date().toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}); }
-  function dateISO(days){ const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
-  function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
-  function serviceNames(text){ return String(text||'').split(',').map(x=>x.trim()).filter(Boolean); }
-  function hasService(text, needle){ return String(text||'').toLowerCase().includes(String(needle).toLowerCase()); }
-  function customerByName(name){ return db.customers.find(x=>String(x.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase()); }
-  function workflowKey(customer, service, suffix){ return 'WF1|'+slug(customer)+'|'+slug(service)+'|'+suffix; }
-  function hasWorkflowRecord(collection, key){ return db[collection].some(x=>x.workflowKey===key); }
 
-  function ensureTask(name, customer, project, due, extra){
-    const key=workflowKey(customer,project||'general',slug(name));
-    if(hasWorkflowRecord('tasks',key)) return;
-    db.tasks.unshift({name,customer,due:due||'—',status:'To do',project:project||'',workflowKey:key,automated:true,...(extra||{})});
-  }
-
-  function ensureProject(customer, servicesText, source, nameOverride){
-    const serviceText=servicesText||'General';
-    const existing=db.projects.find(p=>String(p.customer||'').toLowerCase()===String(customer||'').toLowerCase() && String(p.services||'').toLowerCase()===String(serviceText).toLowerCase() && p.workflowSource);
-    if(existing) return existing;
-    const project={name:nameOverride||((customer||'Customer')+' — '+serviceText),customer,services:serviceText,status:'Requirements',due:'—',progress:0,workflowSource:source||'automation',workflowVersion:FLOW_VERSION,createdAt:new Date().toISOString()};
-    db.projects.unshift(project);
-    const projectName=project.name;
-    ensureTask('Confirm requirements and scope',customer,projectName,dateISO(1));
-    ensureTask('Prepare project plan and deliverables',customer,projectName,dateISO(2));
-    ensureTask('Start delivery / implementation',customer,projectName,dateISO(3));
-    if(hasService(serviceText,'POS')) {
-      ensureTask('Confirm POS hardware, software and operating requirements',customer,projectName,dateISO(1));
-      ensureTask('Configure POS workflow and product setup',customer,projectName,dateISO(4));
-      ensureTask('Test POS sales, payments and reports',customer,projectName,dateISO(7));
-      ensureTask('Prepare POS handover and customer training',customer,projectName,dateISO(9));
-    } else if(hasService(serviceText,'Website')) {
-      ensureTask('Collect website content, branding and access details',customer,projectName,dateISO(2));
-      ensureTask('Build and review website',customer,projectName,dateISO(7));
-    } else if(hasService(serviceText,'AI') || hasService(serviceText,'Automation')) {
-      ensureTask('Confirm automation workflow and requirements',customer,projectName,dateISO(2));
-      ensureTask('Build and test automation',customer,projectName,dateISO(7));
-    } else if(hasService(serviceText,'Brand')) {
-      ensureTask('Confirm brand direction and assets',customer,projectName,dateISO(2));
-      ensureTask('Prepare branding concepts and revisions',customer,projectName,dateISO(7));
-    }
-    return project;
-  }
-
-  function ensureInvoice(customer, amount, source, status){
-    const key=workflowKey(customer,source||'project','invoice');
-    const existing=db.invoices.find(x=>x.workflowKey===key);
-    if(existing) return existing;
-    const inv={id:'INV-'+(19+db.invoices.length),customer,amount:Number(amount||0),due:dateISO(7),status:status||'Draft',workflowKey:key,workflowSource:source||'project',automated:true};
-    db.invoices.unshift(inv);
-    return inv;
-  }
-
-  function ensureDocument(customer, name, type, project){
-    const key=workflowKey(customer,project||name,'document-'+type);
-    if(hasWorkflowRecord('documents',key)) return;
-    db.documents.unshift({name,customer,type,status:'Draft',project:project||'',workflowKey:key,automated:true});
-  }
-
-  function serviceFromCustomer(){
-    return document.getElementById('cService')?.value||'';
-  }
-
-  function populateCustomerSelect(id, placeholder){
-    const el=document.getElementById(id);
-    if(!el) return;
-    const current=el.value||'';
-    const options='<option value="">'+(placeholder||'Select customer')+'</option>'+db.customers.filter(x=>x.status!=='Archived'&&x.status!=='Deleted').map(x=>'<option value="'+esc(x.name)+'">'+esc(x.name)+(x.contact?' — '+esc(x.contact):'')+'</option>').join('');
-    if(el.tagName==='SELECT'){
-      el.innerHTML=options;
-      if(current && customerByName(current)) el.value=current;
-      return;
-    }
-    const select=document.createElement('select');
-    select.id=id; select.name=el.name||id; select.required=el.required;
-    select.innerHTML=options;
-    if(current && customerByName(current)) select.value=current;
-    el.replaceWith(select);
-  }
-  function refreshCustomerSelects(){
-    ['qCustomer','iCustomer','dCustomer','pCustomer','sCustomer','rCustomer','coBusiness'].forEach(id=>populateCustomerSelect(id,'Select customer'));
-    const task=document.getElementById('tCustomer');
-    if(task) populateCustomerSelect('tCustomer','Select customer');
-    const cs=document.getElementById('cService');
-    if(cs && cs.options.length<2){
-      cs.innerHTML='<option value="">No service yet</option>'+services.map(s=>'<option value="'+esc(s[1])+'">'+esc(s[1])+'</option>').join('');
-    }
-  }
-
-  function addCustomerServiceField(){
-    const modal=document.getElementById('customerModal');
-    if(!modal || document.getElementById('cService')) return;
-    const grid=modal.querySelector('.formgrid');
-    if(!grid) return;
-    const wrap=document.createElement('div');
-    wrap.className='field full';
-    wrap.innerHTML='<label>Initial service (optional)</label><select id="cService"><option value="">No service yet</option>'+services.map(s=>'<option value="'+esc(s[1])+'">'+esc(s[1])+'</option>').join('')+'</select><div class="mini-stat" style="margin-top:5px">Choose a service if you want Hetzen to start the project workflow immediately.</div>';
-    grid.appendChild(wrap);
-  }
-
-  function addTaskCustomerField(){
-    const modal=document.getElementById('taskModal');
-    if(!modal || document.getElementById('tCustomer')) return;
-    const grid=modal.querySelector('.formgrid'); if(!grid) return;
-    const first=grid.querySelector('.field');
-    const wrap=document.createElement('div'); wrap.className='field';
-    wrap.innerHTML='<label>Customer</label><select id="tCustomer"><option value="">Internal / no customer</option></select>';
-    if(first) grid.insertBefore(wrap,first); else grid.appendChild(wrap);
-  }
-
-  function openCustomerInvoice(name){
-    openModal('invoiceModal');
-    setTimeout(()=>{refreshCustomerSelects(); const e=document.getElementById('iCustomer'); if(e)e.value=name;},0);
-  }
-  function openCustomerQuote(name){
-    openModal('quoteModal');
-    setTimeout(()=>{refreshCustomerSelects(); const e=document.getElementById('qCustomer'); if(e)e.value=name;},0);
-  }
-  window.openCustomerInvoice=openCustomerInvoice;
-  window.openCustomerQuote=openCustomerQuote;
-
-  window.archiveCustomer=function(name){
-    const c=customerByName(name); if(!c) return;
-    if(!confirm('Archive '+c.name+'? Its history will be kept, but it will no longer appear in new customer selectors.')) return;
-    c.status='Archived'; c.archivedAt=new Date().toISOString(); persist(); toast('Customer archived');
-  };
-  window.deleteCustomer=function(name){
-    const c=customerByName(name); if(!c) return;
-    const linked=['consultations','projects','quotes','invoices','documents','tasks','support'].some(k=>db[k].some(x=>String(x.customer||x.business||'').toLowerCase()===String(c.name||'').toLowerCase()));
-    if(linked){ toast('Customer has linked records. Archive it instead of deleting.'); return; }
-    if(!confirm('Permanently delete '+c.name+'? This cannot be undone.')) return;
-    db.customers=db.customers.filter(x=>x!==c); persist(); toast('Customer deleted');
-  };
-  window.restoreCustomer=function(name){
-    const c=customerByName(name); if(!c) return;
-    c.status='Active'; delete c.archivedAt; persist(); toast('Customer restored');
-  };
-
-  function enrichCustomerRows(){ return; }
-
-  const originalRenderCustomers=window.renderCustomers;
-  window.renderCustomers=function(){ originalRenderCustomers(); enrichCustomerRows(); refreshCustomerSelects(); };
-
-  const originalGo=window.go;
-  window.go=function(id){ originalGo(id); setTimeout(()=>{refreshCustomerSelects();enrichCustomerRows()},0); };
-
-  const originalOpenModal=window.openModal;
-  window.openModal=function(id){
-    originalOpenModal(id);
-    if(id==='customerModal') addCustomerServiceField();
-    if(id==='taskModal') addTaskCustomerField();
-    setTimeout(refreshCustomerSelects,0);
-  };
-
-  const originalAddCustomer=window.addCustomer;
-  window.addCustomer=function(e){
-    e.preventDefault();
-    const service=serviceFromCustomer();
-    const name=(document.getElementById('cName')?.value||'').trim();
-    const contact=document.getElementById('cContact')?.value||'';
-    const phone=document.getElementById('cPhone')?.value||'';
-    const email=document.getElementById('cEmail')?.value||'';
-    const industry=document.getElementById('cIndustry')?.value||'';
-    db.customers.unshift({name,contact,phone,email,industry,services:service||'Not assigned',projects:0,status:'Active'});
-    if(service){
-      const p=ensureProject(name,service,'customer');
-      if(hasService(service,'POS')) ensureInvoice(name,0,'POS onboarding','Draft');
-      if(hasService(service,'POS')) ensureDocument(name,name+' — POS Project Pack','Requirements',p.name);
-    }
-    persist();
-    e.target.reset(); closeModal('customerModal');
-    toast(service ? 'Customer added — project workflow started' : 'Customer added');
-  };
-
-  window.saveConsultation=function(e){
-    e.preventDefault();
-    const business=(document.getElementById('coBusiness')?.value||'').trim();
-    const contact=document.getElementById('coContact')?.value||'';
-    const phone=document.getElementById('coPhone')?.value||'';
-    const industry=document.getElementById('coIndustry')?.value||'';
-    const servicesSelected=[...document.querySelectorAll('#consultServices input:checked')].map(x=>services.find(s=>s[0]===x.value)?.[1]).filter(Boolean);
-    const serviceText=servicesSelected.join(', ')||'Discovery only';
-    db.consultations.unshift({business,contact,phone,industry,services:serviceText,status:'Requirements saved',date:today(),workflowVersion:FLOW_VERSION});
-    const customer=customerByName(business);
-    if(customer) customer.services=serviceText;
-    const p=ensureProject(business,serviceText,'consultation');
-    if(hasService(serviceText,'POS')) ensureInvoice(business,0,'POS consultation','Draft');
-    ensureDocument(business,business+' — Requirements & Scope','Requirements',p.name);
-    persist();
-    document.querySelector('#consultModal form')?.reset();
-    closeModal('consultModal');
-    toast('Consultation saved — project and tasks created');
-    go('projects');
-  };
-
-  function createCompletionWorkflow(p){
-    const source=p.services||'Project';
-    let amount=0;
-    const quote=db.quotes.find(q=>String(q.customer||'').toLowerCase()===String(p.customer||'').toLowerCase() && q.status==='Accepted' && (hasService(q.items,source.split(',')[0]) || hasService(source,q.items)));
-    if(quote) amount=Number(quote.amount||0);
-    const inv=ensureInvoice(p.customer,amount,p.name,'Due');
-    ensureDocument(p.customer,p.name+' — Handover','Handover',p.name);
-    ensureTask('Send invoice '+inv.id,p.customer,p.name,dateISO(0),{status:'Ready'});
-    ensureTask('Confirm payment for '+inv.id,p.customer,p.name,dateISO(7));
-    ensureTask('Archive project and confirm ongoing support',p.customer,p.name,dateISO(8));
-    return inv;
-  }
-
-  window.advanceProject=function(i){
-    const p=db.projects[i]; if(!p) return;
-    const before=p.status;
-    if(Number(p.progress||0)<100) p.progress=Math.min(100,Number(p.progress||0)+20);
-    if(p.progress>=100) p.status='Complete';
-    else if(p.progress>=80) p.status='Handover';
-    else if(p.progress>=60) p.status='Review';
-    else if(p.progress>=40) p.status='Build';
-    else p.status='Requirements';
-    if(p.status==='Handover' && before!=='Handover'){
-      ensureDocument(p.customer,p.name+' — Handover','Handover',p.name);
-      ensureTask('Prepare final handover for '+p.name,p.customer,p.name,dateISO(1));
-      ensureTask('Get customer handover confirmation',p.customer,p.name,dateISO(2));
-    }
-    if(p.status==='Complete' && before!=='Complete'){
-      const inv=createCompletionWorkflow(p);
-      toast('Project complete — '+inv.id+' created in Invoices & Payments');
-    } else {
-      toast('Project advanced to '+p.status);
-    }
-    persist();
-  };
-
-  const originalCycleQuote=window.cycleQuote;
-  window.cycleQuote=function(i){
-    const before=db.quotes[i]?.status;
-    originalCycleQuote(i);
-    const q=db.quotes[i];
-    if(q && q.status==='Accepted' && before!=='Accepted'){
-      const p=ensureProject(q.customer,q.items,'accepted-quote');
-      ensureTask('Begin work from accepted quotation',q.customer,p.name,dateISO(1));
-      ensureDocument(q.customer,(q.id||'Quote')+' — Accepted','Quotation',p.name);
-      persist();
-      toast('Quote accepted — project and tasks created');
-    }
-  };
-
-  const originalAddQuote=window.addQuote;
-  window.addQuote=function(e){
-    e.preventDefault();
-    const customer=document.getElementById('qCustomer')?.value||'';
-    const item=document.getElementById('qService')?.value||'';
-    const amount=Number(document.getElementById('qAmount')?.value||0);
-    const status=document.getElementById('qStatus')?.value||'Draft';
-    db.quotes.unshift({id:'HT-'+(105+db.quotes.length),customer,items:item,amount,status});
-    if(status==='Accepted'){
-      const p=ensureProject(customer,item,'accepted-quote');
-      ensureTask('Begin work from accepted quotation',customer,p.name,dateISO(1));
-    }
-    persist(); e.target.reset(); closeModal('quoteModal');
-    toast(status==='Accepted'?'Quote created — project workflow started':'Quote created');
-  };
-
-  const originalAddInvoice=window.addInvoice;
-  window.addInvoice=function(e){
-    e.preventDefault();
-    const customer=document.getElementById('iCustomer')?.value||'';
-    const amount=Number(document.getElementById('iAmount')?.value||0);
-    const due=document.getElementById('iDue')?.value||'—';
-    const status=document.getElementById('iStatus')?.value||'Due';
-    db.invoices.unshift({id:'INV-'+(19+db.invoices.length),customer,amount,due,status});
-    ensureTask('Follow up invoice payment',customer,'Accounts',due==='—'?dateISO(7):due);
-    persist(); e.target.reset(); closeModal('invoiceModal'); toast('Invoice created — payment follow-up task added');
-  };
-
-  const originalAddDocument=window.addDocument;
-  window.addDocument=function(e){
-    e.preventDefault();
-    const customer=document.getElementById('dCustomer')?.value||'';
-    db.documents.unshift({name:dName.value,customer,type:dType.value,status:dStatus.value});
-    persist(); e.target.reset(); closeModal('documentModal'); toast('Document added');
-  };
-
-  const originalAddTask=window.addTask;
-  window.addTask=function(e){
-    e.preventDefault();
-    const customer=document.getElementById('tCustomer')?.value||'';
-    db.tasks.unshift({name:tName.value,due:tDue.value||'—',status:tStatus.value,customer,automated:false});
-    persist(); e.target.reset(); closeModal('taskModal'); toast('Task added');
-  };
-
-  window.cancelConsultation=function(i){ if(!confirm('Cancel this consultation?'))return; if(db.consultations[i]){db.consultations[i].status='Cancelled';persist();toast('Consultation cancelled')} };
-  window.cancelProject=function(i){ if(!confirm('Cancel this project?'))return; if(db.projects[i]){db.projects[i].status='Cancelled';persist();toast('Project cancelled')} };
-  window.cancelQuote=function(i){ if(!confirm('Cancel this quote?'))return; if(db.quotes[i]){db.quotes[i].status='Cancelled';persist();toast('Quote cancelled')} };
-  window.voidInvoice=function(i){ if(!confirm('Void this invoice?'))return; if(db.invoices[i]){db.invoices[i].status='Voided';persist();toast('Invoice voided')} };
-
-  function setup(){
-    addCustomerServiceField();
-    addTaskCustomerField();
-    refreshCustomerSelects();
-    enrichCustomerRows();
-  }
-  window.addEventListener('load',()=>setTimeout(setup,50));
-  window.hetzenWorkflow={version:FLOW_VERSION,refresh:setup};
-})();
-</script>
 
 <script>
-/* HETZEN CUSTOMER ACTION BRIDGE — independent fallback */
+/* HETZEN CUSTOMER ACTIONS — stable customer controls */
 (function(){
-  function customerByNameSafe(name){
-    return (window.db?.customers||[]).find(x=>String(x.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());
+  function findCustomer(name){
+    return (typeof db!=='undefined' && Array.isArray(db.customers))
+      ? db.customers.find(c=>String(c.name||'').toLowerCase()===String(name||'').toLowerCase())
+      : null;
+  }
+  function save(){
+    if(typeof persist==='function') persist();
+    else {
+      localStorage.setItem('hetzenBusinessDataV2',JSON.stringify(db));
+      if(typeof renderAll==='function') renderAll();
+    }
   }
   window.openCustomerQuote=function(name){
-    const modal=document.getElementById('quoteModal');
-    if(!modal) return;
-    modal.classList.add('open');
-    setTimeout(function(){
-      if(window.refreshCustomerSelects) window.refreshCustomerSelects();
-      const el=document.getElementById('qCustomer');
-      if(el) el.value=name||'';
-    },0);
+    if(typeof openModal==='function') openModal('quoteModal');
+    const el=document.getElementById('qCustomer');
+    if(el){
+      if(typeof refreshCustomerSelects==='function') refreshCustomerSelects();
+      el.value=name||'';
+    }
   };
   window.openCustomerInvoice=function(name){
-    const modal=document.getElementById('invoiceModal');
-    if(!modal) return;
-    modal.classList.add('open');
-    setTimeout(function(){
-      if(window.refreshCustomerSelects) window.refreshCustomerSelects();
-      const el=document.getElementById('iCustomer');
-      if(el) el.value=name||'';
-    },0);
+    if(typeof openModal==='function') openModal('invoiceModal');
+    const el=document.getElementById('iCustomer');
+    if(el){
+      if(typeof refreshCustomerSelects==='function') refreshCustomerSelects();
+      el.value=name||'';
+    }
   };
   window.archiveCustomer=function(name){
-    const c=customerByNameSafe(name);
-    if(!c) return;
-    if(!window.confirm('Archive '+c.name+'? Its history will be kept, but it will no longer appear in new customer selectors.')) return;
-    c.status='Archived';
-    c.archivedAt=new Date().toISOString();
-    if(window.persist) window.persist();
-    if(window.toast) window.toast('Customer archived');
+    const c=findCustomer(name); if(!c)return;
+    if(!window.confirm('Archive '+c.name+'? Its history will be kept.'))return;
+    c.status='Archived'; c.archivedAt=new Date().toISOString(); save();
+    if(typeof toast==='function')toast('Customer archived');
   };
   window.restoreCustomer=function(name){
-    const c=customerByNameSafe(name);
-    if(!c) return;
-    c.status='Active';
-    delete c.archivedAt;
-    if(window.persist) window.persist();
-    if(window.toast) window.toast('Customer restored');
+    const c=findCustomer(name); if(!c)return;
+    c.status='Active'; delete c.archivedAt; save();
+    if(typeof toast==='function')toast('Customer restored');
   };
   window.deleteCustomer=function(name){
-    const c=customerByNameSafe(name);
-    if(!c) return;
-    const linked=['consultations','projects','quotes','invoices','documents','tasks','support'].some(function(k){
-      return (window.db?.[k]||[]).some(function(x){
-        return String(x.customer||x.business||'').toLowerCase()===String(c.name||'').toLowerCase();
-      });
-    });
-    if(linked){
-      if(window.toast) window.toast('Customer has linked records. Archive it instead of deleting.');
-      return;
-    }
-    if(!window.confirm('Permanently delete '+c.name+'? This cannot be undone.')) return;
-    window.db.customers=window.db.customers.filter(function(x){return x!==c;});
-    if(window.persist) window.persist();
-    if(window.toast) window.toast('Customer deleted');
+    const c=findCustomer(name); if(!c)return;
+    const linked=['consultations','projects','quotes','invoices','documents','tasks','support']
+      .some(k=>Array.isArray(db[k])&&db[k].some(x=>String(x.customer||x.business||'').toLowerCase()===String(c.name||'').toLowerCase()));
+    if(linked){ if(typeof toast==='function')toast('Customer has linked records. Archive it instead.'); return; }
+    if(!window.confirm('Permanently delete '+c.name+'? This cannot be undone.'))return;
+    db.customers=db.customers.filter(x=>x!==c); save();
+    if(typeof toast==='function')toast('Customer deleted');
   };
+  function renderCustomerActions(){
+    if(typeof db==='undefined'||!Array.isArray(db.customers))return;
+    const body=document.getElementById('customerRows'); if(!body)return;
+    const q=(document.getElementById('customerSearch')?.value||'').toLowerCase();
+    const rows=db.customers.filter(x=>(x.name+x.contact+x.industry).toLowerCase().includes(q));
+    body.innerHTML=rows.map(x=>{
+      const n=esc(x.name), raw=JSON.stringify(x.name), archived=x.status==='Archived';
+      return '<tr><td><b>'+n+'</b><div class="mini-stat">'+esc(x.industry)+'</div></td>'+
+      '<td>'+esc(x.contact)+'<div class="mini-stat">'+esc(x.phone)+'</div></td>'+
+      '<td><div class="service-list"><span class="service-chip">'+esc(x.services)+'</span></div></td>'+
+      '<td>'+x.projects+'</td><td>'+statusPill(x.status)+'</td><td class="customer-actions">'+
+      '<button class="btn light" type="button" onclick="startCustomerConsult('+raw+')">Consult</button>'+
+      '<button class="btn light" type="button" onclick="openCustomerQuote('+raw+')">Quote</button>'+
+      '<button class="btn light" type="button" onclick="openCustomerInvoice('+raw+')">Invoice</button>'+
+      (archived?'<button class="btn light" type="button" onclick="restoreCustomer('+raw+')">Restore</button>':'<button class="btn light" type="button" onclick="archiveCustomer('+raw+')">Archive</button>')+
+      '<button class="btn danger" type="button" onclick="deleteCustomer('+raw+')">Delete</button></td></tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">No customers found.</td></tr>';
+  }
+  const originalRender=window.renderCustomers;
+  window.renderCustomers=function(){ originalRender(); renderCustomerActions(); };
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderCustomerActions,0));
 })();
 </script>
 </body></html>
