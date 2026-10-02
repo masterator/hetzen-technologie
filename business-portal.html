@@ -587,6 +587,23 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
   window.openCustomerInvoice=openCustomerInvoice;
   window.openCustomerQuote=openCustomerQuote;
 
+  window.archiveCustomer=function(name){
+    const c=customerByName(name); if(!c) return;
+    if(!confirm('Archive '+c.name+'? Its history will be kept, but it will no longer appear in new customer selectors.')) return;
+    c.status='Archived'; c.archivedAt=new Date().toISOString(); persist(); toast('Customer archived');
+  };
+  window.deleteCustomer=function(name){
+    const c=customerByName(name); if(!c) return;
+    const linked=['consultations','projects','quotes','invoices','documents','tasks','support'].some(k=>db[k].some(x=>String(x.customer||x.business||'').toLowerCase()===String(c.name||'').toLowerCase()));
+    if(linked){ toast('Customer has linked records. Archive it instead of deleting.'); return; }
+    if(!confirm('Permanently delete '+c.name+'? This cannot be undone.')) return;
+    db.customers=db.customers.filter(x=>x!==c); persist(); toast('Customer deleted');
+  };
+  window.restoreCustomer=function(name){
+    const c=customerByName(name); if(!c) return;
+    c.status='Active'; delete c.archivedAt; persist(); toast('Customer restored');
+  };
+
   function enrichCustomerRows(){
     const rows=[...document.querySelectorAll('#customerRows tr')];
     rows.forEach(row=>{
@@ -595,7 +612,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       if(!first||!action||!first.querySelector('b')) return;
       const name=first.querySelector('b').textContent.trim();
       if(!customerByName(name)) return;
-      action.insertAdjacentHTML('beforeend',' <button class="btn light" type="button" onclick="openCustomerQuote('+JSON.stringify(name)+')">Quote</button><button class="btn light" type="button" onclick="openCustomerInvoice('+JSON.stringify(name)+')">Invoice</button>');
+      action.insertAdjacentHTML('beforeend',' <button class="btn light" type="button" onclick="openCustomerQuote('+JSON.stringify(name)+')">Quote</button><button class="btn light" type="button" onclick="openCustomerInvoice('+JSON.stringify(name)+')">Invoice</button><button class="btn light" type="button" onclick="archiveCustomer('+JSON.stringify(name)+')">Archive</button><button class="btn danger" type="button" onclick="deleteCustomer('+JSON.stringify(name)+')">Delete</button>');
       row.dataset.workflowActions='1';
     });
   }
