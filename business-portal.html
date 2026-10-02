@@ -482,7 +482,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 
 
 <script>
-/* HETZEN CUSTOMER ACTIONS — stable customer controls */
+/* HETZEN CUSTOMER ACTIONS — stable customer controls (no inline handlers) */
 (function(){
   function findCustomer(name){
     return (typeof db!=='undefined' && Array.isArray(db.customers))
@@ -538,21 +538,36 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
     const q=(document.getElementById('customerSearch')?.value||'').toLowerCase();
     const rows=db.customers.filter(x=>(x.name+x.contact+x.industry).toLowerCase().includes(q));
     body.innerHTML=rows.map(x=>{
-      const n=esc(x.name), raw=JSON.stringify(x.name), archived=x.status==='Archived';
+      const n=esc(x.name), archived=x.status==='Archived';
       return '<tr><td><b>'+n+'</b><div class="mini-stat">'+esc(x.industry)+'</div></td>'+
       '<td>'+esc(x.contact)+'<div class="mini-stat">'+esc(x.phone)+'</div></td>'+
       '<td><div class="service-list"><span class="service-chip">'+esc(x.services)+'</span></div></td>'+
       '<td>'+x.projects+'</td><td>'+statusPill(x.status)+'</td><td class="customer-actions">'+
-      '<button class="btn light" type="button" onclick="startCustomerConsult('+raw+')">Consult</button>'+
-      '<button class="btn light" type="button" onclick="openCustomerQuote('+raw+')">Quote</button>'+
-      '<button class="btn light" type="button" onclick="openCustomerInvoice('+raw+')">Invoice</button>'+
-      (archived?'<button class="btn light" type="button" onclick="restoreCustomer('+raw+')">Restore</button>':'<button class="btn light" type="button" onclick="archiveCustomer('+raw+')">Archive</button>')+
-      '<button class="btn danger" type="button" onclick="deleteCustomer('+raw+')">Delete</button></td></tr>';
+      '<button class="btn light customer-action" type="button" data-action="consult" data-customer="'+n+'">Consult</button>'+
+      '<button class="btn light customer-action" type="button" data-action="quote" data-customer="'+n+'">Quote</button>'+
+      '<button class="btn light customer-action" type="button" data-action="invoice" data-customer="'+n+'">Invoice</button>'+
+      (archived?'<button class="btn light customer-action" type="button" data-action="restore" data-customer="'+n+'">Restore</button>':'<button class="btn light customer-action" type="button" data-action="archive" data-customer="'+n+'">Archive</button>')+
+      '<button class="btn danger customer-action" type="button" data-action="delete" data-customer="'+n+'">Delete</button></td></tr>';
     }).join('')||'<tr><td colspan="6" class="empty">No customers found.</td></tr>';
   }
+  function handleCustomerAction(e){
+    const btn=e.target.closest('.customer-action');
+    if(!btn)return;
+    const name=btn.dataset.customer||'';
+    const action=btn.dataset.action;
+    if(action==='consult' && typeof startCustomerConsult==='function') startCustomerConsult(name);
+    else if(action==='quote') window.openCustomerQuote(name);
+    else if(action==='invoice') window.openCustomerInvoice(name);
+    else if(action==='archive') window.archiveCustomer(name);
+    else if(action==='restore') window.restoreCustomer(name);
+    else if(action==='delete') window.deleteCustomer(name);
+  }
   const originalRender=window.renderCustomers;
-  window.renderCustomers=function(){ originalRender(); renderCustomerActions(); };
+  window.renderCustomers=function(){
+    if(typeof originalRender==='function') originalRender();
+    renderCustomerActions();
+  };
+  document.addEventListener('click',handleCustomerAction);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(renderCustomerActions,0));
-})();
-</script>
+})();</script>
 </body></html>
