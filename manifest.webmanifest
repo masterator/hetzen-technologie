@@ -1,0 +1,14 @@
+{
+  "name": "Hetzen Technologies Business Portal",
+  "short_name": "Hetzen Portal",
+  "description": "Offline-first business management portal for Hetzen Technologies.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#11110f",
+  "theme_color": "#11110f",
+  "orientation": "any",
+  "icons": [
+    {"src":"hetzen-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
