@@ -426,7 +426,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 
 </script>
 <style>
-/* V3 ATS / machine-readable document system */
+/* Clear document format system */
 .ats-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #cfe3d3;background:#eef6ee;color:#24613c;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.3px}
 .ats-info{border-left:3px solid var(--gold);background:var(--surface2);padding:12px 14px;border-radius:7px;font-size:12px;color:var(--ink);margin:10px 0 15px}
 .document-ats{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;line-height:1.5}
@@ -463,7 +463,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
 @media(max-width:700px){.document-template-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 <script>
-/* HETZEN BUSINESS PORTAL V3 — ATS-friendly / machine-readable documents */
+/* Hetzen Business Portal — clear document system */
 (function(){
   const ATS_KEY='hetzenATSMode';
   const COUNTER_KEY='hetzenDocumentCounters';
@@ -503,13 +503,13 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
     setTimeout(()=>sheet.remove(),1200);
     return number;
   };
-  window.downloadATSFromLast=function(){const s=document.getElementById('printSheet');const txt=s?.dataset?.plainText||localStorage.getItem('hetzenLastDocumentText');const n=s?.dataset?.documentNumber||localStorage.getItem('hetzenLastDocumentNumber')||'document';if(!txt){toast('Generate a document first');return}downloadBlob(txt,n+'.txt','text/plain;charset=utf-8');toast('Text copy exported')};
+  window.downloadTextFromLast=function(){const s=document.getElementById('printSheet');const txt=s?.dataset?.plainText||localStorage.getItem('hetzenLastDocumentText');const n=s?.dataset?.documentNumber||localStorage.getItem('hetzenLastDocumentNumber')||'document';if(!txt){toast('Generate a document first');return}downloadBlob(txt,n+'.txt','text/plain;charset=utf-8');toast('Text copy exported')};
   function renderAtsControls(){
     let box=document.getElementById('atsControls');
     if(!box){
       const modal=document.getElementById('reportModal');if(!modal)return;
       const form=modal.querySelector('form'); if(!form)return;
-      box=document.createElement('div');box.id='atsControls';box.className='ats-info';box.innerHTML='<strong>Document format</strong><br><label style="display:flex;align-items:center;gap:8px;margin-top:8px"><input id="atsToggle" type="checkbox"> Use Clear, selectable text format</label><small style="display:block;margin-top:6px;color:#666">Important information stays as normal text with clear headings and labels. The PDF remains customer-friendly.</small><button type="button" class="btn light" style="margin-top:9px" onclick="downloadATSFromLast()">Export Text Copy</button>';
+      box=document.createElement('div');box.id='atsControls';box.className='ats-info';box.innerHTML='<strong>Document format</strong><br><label style="display:flex;align-items:center;gap:8px;margin-top:8px"><input id="atsToggle" type="checkbox"> Use Clear, selectable text format</label><small style="display:block;margin-top:6px;color:#666">Important information stays as normal text with clear headings and labels. The PDF remains customer-friendly.</small><button type="button" class="btn light" style="margin-top:9px" onclick="downloadTextFromLast()">Export Text Copy</button>';
       form.insertBefore(box,form.querySelector('button[type="submit"]'));
     }
     const t=document.getElementById('atsToggle');if(t){t.checked=atsEnabled();t.onchange=()=>setAtsMode(t.checked)}
