@@ -1074,4 +1074,66 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
   setTimeout(inject,0);
 })();
 </script>
+<script>
+/* HETZEN REQUIREMENTS & SCOPE LIFECYCLE FIX — 2026-10-07 */
+(function(){
+  const clean=v=>String(v||'').trim();
+  const same=(a,b)=>clean(a).toLowerCase()===clean(b).toLowerCase();
+  function latestRequirement(customer){return (Array.isArray(db.requirements)?db.requirements:[]).find(r=>same(r.customer,customer));}
+  function setRequirementStatus(customer,status){
+    const r=latestRequirement(customer); if(!r)return false;
+    if(r.status===status)return false;
+    r.status=status; r.updatedAt=new Date().toISOString(); return true;
+  }
+  function renderRequirementsLifecycle(){
+    const rows=document.getElementById('requirementsRows'); if(!rows)return;
+    const list=Array.isArray(db.requirements)?db.requirements:[];
+    rows.innerHTML=list.map(x=>{
+      const checks=Object.values(x.checklist||{}).filter(Boolean).length,total=Object.keys(x.checklist||{}).length;
+      let status=x.status||'In progress';
+      if(status==='In progress'&&checks===total&&total)status='Ready for Quote';
+      return '<tr><td><b>'+esc(x.customer)+'</b></td><td>'+esc(x.serviceName||x.service)+'</td><td>'+esc(x.scope||'Not provided yet')+'</td><td>'+esc(x.timeline||'To be confirmed')+'</td><td>'+statusPill(status)+'</td></tr>';
+    }).join('')||'<tr><td colspan="5" class="empty">No requirements recorded yet. Start with a customer and service after your consultation.</td></tr>';
+  }
+  window.syncRequirementLifecycle=function(customer,status){
+    if(setRequirementStatus(customer,status)){persist();renderRequirementsLifecycle();}
+  };
+  const baseRender=window.renderRequirements;
+  window.renderRequirements=function(){if(typeof baseRender==='function')baseRender();renderRequirementsLifecycle();};
+  const baseAddQuote=window.addQuote;
+  window.addQuote=function(e){
+    const customer=clean(document.getElementById('qCustomer')?.value);
+    if(typeof baseAddQuote==='function')baseAddQuote(e);
+    const q=db.quotes?.[0];
+    if(q&&same(q.customer,customer)){
+      if(q.status==='Sent'||q.status==='Awaiting')setRequirementStatus(customer,'Quote Sent');
+      else if(q.status==='Accepted')setRequirementStatus(customer,'Approved');
+      persist();renderRequirementsLifecycle();
+    }
+  };
+  const baseCycleQuote=window.cycleQuote;
+  window.cycleQuote=function(i){
+    if(typeof baseCycleQuote==='function')baseCycleQuote(i);
+    const q=db.quotes?.[i];
+    if(q){
+      if(q.status==='Sent'||q.status==='Awaiting')setRequirementStatus(q.customer,'Quote Sent');
+      else if(q.status==='Accepted')setRequirementStatus(q.customer,'Approved');
+      else if(q.status==='Declined')setRequirementStatus(q.customer,'In progress');
+      persist();renderRequirementsLifecycle();
+    }
+  };
+  const baseAdvanceProject=window.advanceProject;
+  window.advanceProject=function(i){
+    const before=db.projects?.[i]?.status;
+    if(typeof baseAdvanceProject==='function')baseAdvanceProject(i);
+    const p=db.projects?.[i];
+    if(p){
+      if(p.status==='Complete')setRequirementStatus(p.customer,'Complete');
+      else if(p.status==='Handover'||before==='Requirements'||before==='Build')setRequirementStatus(p.customer,'Approved');
+      persist();renderRequirementsLifecycle();
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderRequirementsLifecycle,0));
+})();
+</script>
 </body></html>
