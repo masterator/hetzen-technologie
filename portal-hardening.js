@@ -341,6 +341,33 @@ window.generateCustomerStatement=function(name){
   saveReportHistory({title:'Customer Statement',customer:customerName,type:'statement'});
   printTemplate('Customer Statement',customerName,body, '', stableNumber(c||{id:''},'statement'));
 };
+
+const oldGenerateCustomReport=window.generateCustomReport;
+window.generateCustomReport=function(e){
+  e.preventDefault();
+  const type=document.getElementById('rType')?.value||'custom';
+  const customerName=document.getElementById('rCustomer')?.value||'';
+  const exactName=String(customerName).trim().toLowerCase();
+  const findByCustomer=(items,field='customer')=>items.find(v=>{
+    const cid=String(v.customerId||'').trim();
+    const c=exactCustomer(customerName);
+    if(c&&cid)return cid===String(c.id||'');
+    return String(v[field]||v.customer||v.business||'').trim().toLowerCase()===exactName;
+  });
+  if(type==='invoice'){const x=findByCustomer(db.invoices);if(x)return window.generateInvoicePDF(db.invoices.indexOf(x))}
+  if(type==='quote'){const x=findByCustomer(db.quotes);if(x)return window.generateQuotePDF(db.quotes.indexOf(x))}
+  if(type==='project'){const x=findByCustomer(db.projects);if(x)return window.generateProjectPDF(db.projects.indexOf(x))}
+  if(type==='service'||type==='consultation'){const x=findByCustomer(db.consultations,'business');if(x)return window.generateServicePDF(db.consultations.indexOf(x))}
+  if(type==='requirements'){const x=findByCustomer(db.requirements);if(x)return window.generateRequirementsPDF(db.requirements.indexOf(x))}
+  if(type==='statement')return window.generateCustomerStatement(customerName);
+  if(type==='customer'){
+    const c=exactCustomer(customerName),customer=docCustomer(c||customerName);
+    const body='<div class="doc-summary">'+customerCard(c||customerName)+companyCard()+'</div>'+
+      docSection('Customer Profile',docValueRow('Industry',customer.industry)+docValueRow('Services',customer.services)+docValueRow('Status',customer.status));
+    return printTemplate('Customer Report',customer.name,body,'',stableNumber(c||{},'customer'));
+  }
+  if(typeof oldGenerateCustomReport==='function')return oldGenerateCustomReport(e);
+};
 const oldBackup=window.exportBackup;if(oldBackup)window.exportBackup=function(){oldBackup();localStorage.setItem('hetzenLastBackupAt',new Date().toISOString())};
 window.exportInvoicesCSV=()=>csvDownload('hetzen-invoices.csv',['id','customer','amount','due','status']);
 window.exportProjectsCSV=()=>csvDownload('hetzen-projects.csv',['name','customer','services','status','due','progress']);
