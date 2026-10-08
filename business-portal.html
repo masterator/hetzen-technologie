@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--ink)}
 @media(max-width:950px){.dash-grid-3{grid-template-columns:1fr 1fr}.dash-grid-2{grid-template-columns:1fr}}
 @media(max-width:650px){.dash-grid-3{grid-template-columns:1fr}.dash-grid-2{grid-template-columns:1fr}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="logo.png" type="image/png"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.98.0/dist/umd/supabase.min.js" integrity="sha384-Sm2s7OXxsAMTyJ4iIyRBgVpeGUvMPk2lRQnnZhE78Wej7oggIoolKt+SCt0XJbUB" crossorigin="anonymous"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="logo.png" type="image/png"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
 <style>.pwa-status{position:fixed;right:14px;bottom:14px;z-index:9999;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;color:var(--muted)}.pwa-status.online{display:none}.install-btn{display:none}.install-btn.show{display:inline-flex}</style></head>
 <body><div id="pwaStatus" class="pwa-status">Cloud-ready</div>
 <div id="authGate"><div class="auth-card"><img class="auth-logo" src="hetzen-logo-transparent.png" alt="Hetzen Technologies logo"><h2>Hetzen Business Portal</h2><p>Sign in to your secure Hetzen Technologies workspace.</p><div id="authError" class="auth-error"></div><form id="loginForm"><div class="field"><label>Email</label><input id="authEmail" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input id="authPassword" type="password" required autocomplete="current-password"></div><button id="loginBtn" class="btn gold" type="submit" style="width:100%">Sign In</button></form><div class="auth-links"><button type="button" onclick="resetPortalPassword()">Forgot password?</button></div><div id="authStatus" class="auth-status"></div></div></div>
@@ -182,19 +182,33 @@ const emptyData={customers:[],leads:[],consultations:[],requirements:[],projects
 const DATA_KEY='hetzenBusinessDataV2';
 function sanitizeData(input){
   const empty={customers:[],leads:[],consultations:[],requirements:[],projects:[],quotes:[],invoices:[],documents:[],tasks:[],support:[],forms:[],automations:[]};
-  const out={...empty,...(input||{})};
-  const isSynthetic=(value)=>/example\\.co\\.za|000 0000|sample|demo|fake|placeholder/i.test(String(value||''));
+  const out={...empty,...(input&&typeof input==='object'?input:{})};
   Object.keys(empty).forEach(k=>{
     if(!Array.isArray(out[k])) out[k]=[];
-    if(['customers','leads','consultations','requirements','projects','quotes','invoices','documents','tasks','support'].includes(k)){
-      out[k]=out[k].filter(row=>!Object.values(row||{}).some(isSynthetic));
-    }
+    else out[k]=out[k].map(row=>row&&typeof row==='object'?row:{});
   });
   return out;
 }
-function load(){try{const x=JSON.parse(localStorage.getItem(DATA_KEY)||'null');return sanitizeData(x||emptyData)}catch(e){return sanitizeData(emptyData)}}
+function makeStableId(prefix){if(window.crypto&&crypto.randomUUID)return String(prefix||'REC').toUpperCase()+'-'+crypto.randomUUID();return String(prefix||'REC').toUpperCase()+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9)}
+function migrateBusinessData(data){
+  const d=sanitizeData(data);
+  d.customers.forEach(c=>{if(!c.id)c.id=makeStableId('CUS')});
+  const byName=new Map(d.customers.map(c=>[String(c.name||'').trim().toLowerCase(),c]));
+  d.leads.forEach(l=>{if(!l.id)l.id=makeStableId('LEAD')});
+  ['consultations','requirements','projects','quotes','invoices','documents','tasks','support'].forEach(k=>d[k].forEach(x=>{const c=byName.get(String(x.customer||x.business||'').trim().toLowerCase());if(c)x.customerId=x.customerId||c.id}));
+  d.leads.forEach(l=>{const c=byName.get(String(l.name||'').trim().toLowerCase());if(c)l.customerId=l.customerId||c.id});
+  d._documentCounters=d._documentCounters&&typeof d._documentCounters==='object'?d._documentCounters:{};
+  return d;
+}
+function load(){try{const x=JSON.parse(localStorage.getItem(DATA_KEY)||'null');return migrateBusinessData(x||emptyData)}catch(e){return migrateBusinessData(emptyData)}}
 let db=load();
-function persist(){localStorage.setItem(DATA_KEY,JSON.stringify(db));renderAll();if(window.hetzenCloudSave)window.hetzenCloudSave()}
+function persist(){
+  db=migrateBusinessData(db);
+  localStorage.setItem(DATA_KEY,JSON.stringify(db));
+  localStorage.setItem('hetzenSyncMetaV1',JSON.stringify({...readSyncMeta(),pending:true}));
+  renderAll();
+  if(window.hetzenCloudSave)window.hetzenCloudSave()
+}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const p=document.getElementById(id);if(p)p.classList.add('active');document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById('title').textContent=titles[id]||'Hetzen Portal';scrollTo({top:0,behavior:'smooth'});renderAll()}
 function openMobileNav(){document.querySelector('.side')?.classList.add('open');document.getElementById('mobileOverlay')?.classList.add('open');document.body.style.overflow='hidden'}function closeMobileNav(){document.querySelector('.side')?.classList.remove('open');document.getElementById('mobileOverlay')?.classList.remove('open');document.body.style.overflow=''}document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileNav()});document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>{go(x.dataset.page);closeMobileNav()}));
@@ -421,7 +435,7 @@ function init(){initTheme();const saved=JSON.parse(localStorage.getItem('hetzenS
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;const b=document.getElementById('installBtn');if(b)b.classList.add('show')});
 async function installPWA(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;const b=document.getElementById('installBtn');if(b)b.classList.remove('show')}
-function updatePwaStatus(){const el=document.getElementById('pwaStatus');if(!el)return;el.textContent=navigator.onLine?'Online • Offline-ready':'Offline • Data stays on this device';el.classList.toggle('online',navigator.onLine)}
+function updatePwaStatus(){const el=document.getElementById('pwaStatus');if(!el)return;el.textContent=navigator.onLine?'Online • Cloud sync enabled':'Offline • Working locally; changes sync later';el.classList.toggle('online',navigator.onLine)}
 window.addEventListener('online',updatePwaStatus);window.addEventListener('offline',updatePwaStatus);updatePwaStatus();
 
 </script>
