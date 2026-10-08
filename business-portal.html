@@ -696,8 +696,9 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
         db.automations.push({trigger:r.trigger,action:r.action,review:'No',status:'On',systemKey:r.key,system:true});
     });
   }
-  function save(){persist()}
-  function ensureCustomerOnboarding(name){
+  function enabled(key){const r=db.automations?.find(a=>a.systemKey===key);return !r||r.status!=='Off'}
+function save(){persist()}
+  function ensureCustomerOnboarding(name){if(!enabled('customer_onboarding'))return;
     const key='customer-onboarding:'+clean(name).toLowerCase();
     addProjectOnce('Customer onboarding — '+name,name,'General business onboarding',0,key);
     addTaskOnce('Review new customer and confirm requirements',name,key+':task');
@@ -722,7 +723,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       const industry=clean(document.getElementById('coIndustry')?.value);
       const before=db.consultations.length;
       originalConsult(e);
-      if(db.consultations.length>before){
+      if(db.consultations.length>before && enabled('consultation_to_project')){
         let c=customer(business);
         if(!c){
           c={name:business,contact:contact||'—',phone:phone||'—',email:'',industry:industry||'—',services:db.consultations[0].services||'Not assigned',projects:0,status:'Active'};
@@ -752,7 +753,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       }
     };
   }
-  function acceptQuote(q){
+  function acceptQuote(q){if(!enabled('quote_accepted'))return;
     const key='quote-accepted:'+clean(q.id);
     const p=addProjectOnce('Project — '+q.customer,q.customer,q.items,q.amount,key);
     q.projectId=p&&p.automationKey||key;
@@ -792,10 +793,10 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       originalAdvance(i);
       const now=db.projects[i];
       if(!now)return;
-      if(before!=='Handover' && now.status==='Handover'){
+      if(enabled('project_handover') && before!=='Handover' && now.status==='Handover'){
         addTaskOnce('Prepare handover and final invoice',now.customer,'handover:'+clean(now.name).toLowerCase());
       }
-      if(before!=='Complete' && now.status==='Complete'){
+      if(enabled('project_complete') && before!=='Complete' && now.status==='Complete'){
         const key='project-complete:'+clean(now.name).toLowerCase();
         if(Number(now.amount)>0){
           const paidDeposit=db.invoices.filter(x=>same(x.customer,now.customer)&&x.projectId===now.automationKey).reduce((a,x)=>a+Number(x.amount||0),0);
@@ -815,11 +816,20 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       const before=db.invoices[i]?.status;
       originalCycleInvoice(i);
       const inv=db.invoices[i];
-      if(inv && before!=='Paid' && inv.status==='Paid'){
+      if(inv && before!=='Paid' && inv.status==='Paid' && enabled('invoice_paid')){
         addTaskOnce('Payment received — update customer/project records',inv.customer,'payment:'+clean(inv.id));
         if(inv.projectId){
           const p=db.projects.find(x=>x.automationKey===inv.projectId);
-          if(p && p.status!=='Complete' && Number(p.progress)>=80)p.status='Complete';
+          const linked=db.invoices.filter(x=>x.projectId===inv.projectId);
+          const allPaid=linked.length>0&&linked.every(x=>x.status==='Paid');
+          const paidTotal=linked.filter(x=>x.status==='Paid').reduce((a,x)=>a+Number(x.amount||0),0);
+          const projectAmount=Number(p?.amount||0);
+          if(p && p.status==='Handover' && allPaid && paidTotal>=projectAmount){
+            p.status='Complete';p.progress=100;
+            addTaskOnce('Confirm handover and customer sign-off',p.customer,'project-complete:'+clean(p.name).toLowerCase()+':signoff');
+            const req=db.requirements.find(r=>same(r.customer,p.customer));
+            if(req)req.status='Complete';
+          }
         }
       }
       ensureRules();save();
