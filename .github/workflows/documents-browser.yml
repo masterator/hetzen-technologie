@@ -1,0 +1,38 @@
+name: Documents template browser test
+
+on:
+  push:
+    branches: ["fix/documents-template-restore"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  documents-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run real-browser document tests
+        run: node .github/documents-browser-test.mjs
+
+      - name: Upload document screenshots and PDFs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documents-browser-evidence
+          path: test-artifacts/
+          if-no-files-found: ignore
