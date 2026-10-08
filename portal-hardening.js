@@ -37,7 +37,7 @@ function documentSettings(){
   }
 }
 const docMoney=v=>money(Number(v||0));
-const docText=v=>{const s=String(v??'').trim();return s||'Not provided'};
+const docText=v=>{const s=String(v??'').trim().replace(/[—–]/g,'');return s||'Not provided'};
 const exactCustomer=(recordOrName)=>{
   const ref=typeof recordOrName==='object'&&recordOrName?recordOrName:{name:recordOrName};
   const id=String(ref.customerId||'').trim();
@@ -141,6 +141,7 @@ function printTemplate(title,customer,body,total='',forcedNumber=''){
   document.querySelector('.content').appendChild(sheet);
   sheet.dataset.documentNumber=number;
   document.body.classList.add('document-printing');
+  if(!document.getElementById('hetzenDocumentPrintOverrides')){const st=document.createElement('style');st.id='hetzenDocumentPrintOverrides';st.textContent='@media print{.footer-note,.toast{display:none!important}.document-printing .footer-note,.document-printing .toast{display:none!important}.document-ats .document-brand img{background:#111!important;object-fit:contain!important;object-position:left center!important}}';document.head.appendChild(st)}
   const toastEl=document.getElementById('toast');
   const previousToastDisplay=toastEl?toastEl.style.display:'';
   if(toastEl)toastEl.style.display='none';
