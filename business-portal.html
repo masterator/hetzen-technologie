@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--ink)}
 @media(max-width:950px){.dash-grid-3{grid-template-columns:1fr 1fr}.dash-grid-2{grid-template-columns:1fr}}
 @media(max-width:650px){.dash-grid-3{grid-template-columns:1fr}.dash-grid-2{grid-template-columns:1fr}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="logo.png" type="image/png"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.98.0/dist/umd/supabase.min.js" integrity="sha384-Sm2s7OXxsAMTyJ4iIyRBgVpeGUvMPk2lRQnnZhE78Wej7oggIoolKt+SCt0XJbUB" crossorigin="anonymous"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="logo.png" type="image/png"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
 <style>.pwa-status{position:fixed;right:14px;bottom:14px;z-index:9999;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;color:var(--muted)}.pwa-status.online{display:none}.install-btn{display:none}.install-btn.show{display:inline-flex}</style></head>
 <body><div id="pwaStatus" class="pwa-status">Cloud-ready</div>
 <div id="authGate"><div class="auth-card"><img class="auth-logo" src="hetzen-logo-transparent.png" alt="Hetzen Technologies logo"><h2>Hetzen Business Portal</h2><p>Sign in to your secure Hetzen Technologies workspace.</p><div id="authError" class="auth-error"></div><form id="loginForm"><div class="field"><label>Email</label><input id="authEmail" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input id="authPassword" type="password" required autocomplete="current-password"></div><button id="loginBtn" class="btn gold" type="submit" style="width:100%">Sign In</button></form><div class="auth-links"><button type="button" onclick="resetPortalPassword()">Forgot password?</button></div><div id="authStatus" class="auth-status"></div></div></div>
@@ -139,7 +139,7 @@ body{background:var(--bg);color:var(--ink)}
 </section>
 <section id="forms" class="page"><div class="hero"><div><h2>Forms</h2><p>Manage the question sets used during consultations.</p></div><button class="btn gold" onclick="openModal('formModal')">+ New Form Template</button></div><div class="table"><table><thead><tr><th>Form</th><th>Purpose</th><th>Questions</th><th>Status</th><th>Action</th></tr></thead><tbody id="formRows"></tbody></table></div></section>
 <section id="automations" class="page"><div class="hero"><div><h2>Automations</h2><p>Automation runs behind the scenes — you remain in control.</p></div><button class="btn gold" onclick="openModal('automationModal')">+ New Automation</button></div><div class="panel"><div id="automationList"></div></div></section>
-<section id="settings" class="page"><div class="hero"><div><h2>Settings</h2><p>Company, branding, users, permissions and system rules.</p></div><button id="installBtn" class="btn light install-btn" onclick="installPWA()">Install App</button><button class="btn gold" onclick="saveSettings()">Save Settings</button></div><div class="panel"><div class="formgrid"><div class="field"><label>Company</label><input id="setCompany" value="Hetzen Technologies"></div><div class="field"><label>Tagline</label><input id="setTagline" value="Technology. Digital Solutions. Business Growth."></div><div class="field full"><label>Business description</label><textarea id="setDescription">South African digital technology company providing websites, software, AI & automation, branding, digital infrastructure and related business technology solutions.</textarea></div><div class="field"><label>Primary contact</label><input value="Silas Ramahuta"></div><div class="field"><label>Email</label><input value="midimetjasilas93@gmail.com"></div></div></div><div class="panel" style="margin-top:18px"><h3>System preferences</h3><div class="row"><span>Use gold & black Hetzen branding</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div><div class="row"><span>Autosave business changes</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div><div class="row"><span>Require human review before AI-generated messages</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div></div><div class="panel" style="margin-top:18px"><h3>Appearance</h3><p style="color:var(--muted);font-size:13px;margin-top:-5px">Choose how Hetzen looks. Device setting follows your phone or computer during the day and night.</p><div class="theme-options"><button id="themeLight" class="theme-option" onclick="setTheme('light')"><strong>☀ Light</strong><span>Always use light mode.</span></button><button id="themeDark" class="theme-option" onclick="setTheme('dark')"><strong>◐ Dark</strong><span>Always use dark mode.</span></button><button id="themeSystem" class="theme-option" onclick="setTheme('system')"><strong>◩ Device</strong><span>Follow your device automatically.</span></button></div></div><div class="offline-box"><h4>Cloud & Offline Business Mode</h4><p>Your business data is synced to Supabase when online, with local browser storage available as a fallback when the connection is unavailable.</p><div class="backup-actions"><button class="btn gold" onclick="exportBackup()">Export Business Backup</button><button class="btn light" onclick="document.getElementById('backupFile').click()">Import Backup</button><button class="btn light" onclick="exportCustomersCSV()">Export Customers CSV</button><input id="backupFile" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)"></div><div id="backupStatus" class="backup-status">No backup action yet.</div></div><div class="danger-zone"><h4>Start Fresh / Clear Business Workspace</h4><p>This permanently clears the business records for the currently signed-in Hetzen account in Supabase, including customers, leads, consultations, projects, quotes, invoices, documents, tasks, support tickets, forms and automations. Company settings are kept.</p><button class="btn danger" type="button" onclick="openStartFresh()">Start Fresh</button></div></section>
+<section id="settings" class="page"><div class="hero"><div><h2>Settings</h2><p>Company, branding, users, permissions and system rules.</p></div><button id="installBtn" class="btn light install-btn" onclick="installPWA()">Install App</button><button class="btn gold" onclick="saveSettings()">Save Settings</button></div><div class="panel"><div class="formgrid"><div class="field"><label>Company</label><input id="setCompany" value="Hetzen Technologies"></div><div class="field"><label>Tagline</label><input id="setTagline" value="Technology. Digital Solutions. Business Growth."></div><div class="field full"><label>Business description</label><textarea id="setDescription">South African digital technology company providing websites, software, AI & automation, branding, digital infrastructure and related business technology solutions.</textarea></div><div class="field"><label>Primary contact</label><input value="Silas Ramahuta"></div><div class="field"><label>Email</label><input id="setEmail" value="midimetjasilas93@gmail.com"></div><div class="field"><label>Phone</label><input id="setPhone" value="081 300 4634"></div></div></div><div class="panel" style="margin-top:18px"><h3>System preferences</h3><div class="row"><span>Use gold & black Hetzen branding</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div><div class="row"><span>Autosave business changes</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div><div class="row"><span>Require human review before AI-generated messages</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div></div><div class="panel" style="margin-top:18px"><h3>Appearance</h3><p style="color:var(--muted);font-size:13px;margin-top:-5px">Choose how Hetzen looks. Device setting follows your phone or computer during the day and night.</p><div class="theme-options"><button id="themeLight" class="theme-option" onclick="setTheme('light')"><strong>☀ Light</strong><span>Always use light mode.</span></button><button id="themeDark" class="theme-option" onclick="setTheme('dark')"><strong>◐ Dark</strong><span>Always use dark mode.</span></button><button id="themeSystem" class="theme-option" onclick="setTheme('system')"><strong>◩ Device</strong><span>Follow your device automatically.</span></button></div></div><div class="offline-box"><h4>Cloud & Offline Business Mode</h4><p>Your business data is synced to Supabase when online, with local browser storage available as a fallback when the connection is unavailable.</p><div class="backup-actions"><button class="btn gold" onclick="exportBackup()">Download full backup</button><button class="btn light" onclick="document.getElementById('backupFile').click()">Import Backup</button><button class="btn light" onclick="exportCustomersCSV()">Export Customers CSV</button><button class="btn light" onclick="exportInvoicesCSV()">Export Invoices CSV</button><button class="btn light" onclick="exportProjectsCSV()">Export Projects CSV</button><input id="backupFile" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)"></div><div id="backupStatus" class="backup-status">No backup action yet.</div></div><div class="danger-zone"><h4>Start Fresh / Clear Business Workspace</h4><p>This permanently clears the business records for the currently signed-in Hetzen account in Supabase, including customers, leads, consultations, projects, quotes, invoices, documents, tasks, support tickets, forms and automations. Company settings are kept.</p><button class="btn danger" type="button" onclick="openStartFresh()">Start Fresh</button></div></section>
 <p class="footer-note">Business workspace. Your records are stored locally when offline and can be synced securely to your Hetzen account when online.</p>
 </div></main></div>
 <div class="mobile-nav"><button data-page="dashboard">Home</button><button data-page="customers">Customers</button><button data-page="consultations">Consult</button><button data-page="projects">Projects</button><button data-page="quotes">Quotes</button></div>
@@ -148,7 +148,7 @@ body{background:var(--bg);color:var(--ink)}
 <div class="modal" id="quickModal"><div class="modal-box"><div class="modal-head"><h3>Quick Add</h3><button class="close" onclick="closeModal('quickModal')">×</button></div><div class="quick-grid"><button class="quick" onclick="closeModal('quickModal');openModal('customerModal')"><strong>Customer</strong><span>Add a customer</span></button><button class="quick" onclick="closeModal('quickModal');openModal('leadModal')"><strong>Lead</strong><span>Add an enquiry</span></button><button class="quick" onclick="closeModal('quickModal');openModal('quoteModal')"><strong>Quote</strong><span>Create a quote</span></button><button class="quick" onclick="closeModal('quickModal');openModal('taskModal')"><strong>Task</strong><span>Add a task</span></button></div></div></div>
 <div class="modal" id="customerModal"><div class="modal-box"><div class="modal-head"><h3>New Customer</h3><button class="close" onclick="closeModal('customerModal')">×</button></div><form onsubmit="addCustomer(event)"><div class="formgrid"><div class="field"><label>Business name *</label><input id="cName" required></div><div class="field"><label>Contact person *</label><input id="cContact" required></div><div class="field"><label>Phone / WhatsApp</label><input id="cPhone"></div><div class="field"><label>Email</label><input id="cEmail" type="email"></div><div class="field full"><label>Industry</label><input id="cIndustry"></div></div><button class="btn gold" style="margin-top:16px">Save Customer</button></form></div></div>
 <div class="modal" id="leadModal"><div class="modal-box"><div class="modal-head"><h3>New Lead</h3><button class="close" onclick="closeModal('leadModal')">×</button></div><form onsubmit="addLead(event)"><div class="formgrid"><div class="field"><label>Lead / business *</label><input id="lName" required></div><div class="field"><label>Source</label><select id="lSource"><option>WhatsApp</option><option>Facebook</option><option>Website</option><option>Referral</option><option>Other</option></select></div><div class="field full"><label>What do they need?</label><input id="lNeed" placeholder="Website + AI automation, POS, branding..."></div><div class="field"><label>Stage</label><select id="lStage"><option>New</option><option>Discovery</option><option>Quote</option><option>Won</option><option>Lost</option></select></div><div class="field"><label>Next action</label><input id="lAction" placeholder="Call, quote, follow up..."></div></div><button class="btn gold" style="margin-top:16px">Save Lead</button></form></div></div>
-<div class="modal" id="quoteModal"><div class="modal-box"><div class="modal-head"><h3>New Quote</h3><button class="close" onclick="closeModal('quoteModal')">×</button></div><form onsubmit="addQuote(event)"><div class="formgrid"><div class="field"><label>Customer *</label><select id="qCustomer" required><option value="">Select existing customer</option></select></div><div class="field"><label>Service / package *</label><input id="qService" placeholder="Website + Automation" required></div><div class="field"><label>Amount (R) *</label><input id="qAmount" type="number" min="0" required></div><div class="field"><label>Status</label><select id="qStatus"><option>Draft</option><option>Sent</option><option>Awaiting</option><option>Accepted</option><option>Declined</option></select></div></div><button class="btn gold" style="margin-top:16px">Create Quote</button></form></div></div>
+<div class="modal" id="quoteModal"><div class="modal-box"><div class="modal-head"><h3>New Quote</h3><button class="close" onclick="closeModal('quoteModal')">×</button></div><form onsubmit="addQuote(event)"><div class="formgrid"><div class="field"><label>Customer *</label><select id="qCustomer" required><option value="">Select existing customer</option></select></div><div class="field"><label>Service / package *</label><input id="qService" placeholder="Website + Automation" required></div><div class="field"><label>Amount (R) *</label><input id="qAmount" type="number" min="0" required></div><div class="field"><label>Quote expiry</label><input id="qExpiry" type="date"></div><div class="field"><label>Status</label><select id="qStatus"><option>Draft</option><option>Sent</option><option>Awaiting</option><option>Accepted</option><option>Declined</option></select></div></div><button class="btn gold" style="margin-top:16px">Create Quote</button></form></div></div>
 <div class="modal" id="invoiceModal"><div class="modal-box"><div class="modal-head"><h3>New Invoice</h3><button class="close" onclick="closeModal('invoiceModal')">×</button></div><form onsubmit="addInvoice(event)"><div class="formgrid"><div class="field"><label>Customer *</label><select id="iCustomer" required><option value="">Select existing customer</option></select></div><div class="field"><label>Amount (R) *</label><input id="iAmount" type="number" min="0" required></div><div class="field"><label>Due date</label><input id="iDue" type="date"></div><div class="field"><label>Status</label><select id="iStatus"><option>Due</option><option>Paid</option><option>Overdue</option><option>Part Paid</option></select></div></div><button class="btn gold" style="margin-top:16px">Create Invoice</button></form></div></div>
 <div class="modal" id="documentModal"><div class="modal-box"><div class="modal-head"><h3>Add Document</h3><button class="close" onclick="closeModal('documentModal')">×</button></div><form onsubmit="addDocument(event)"><div class="formgrid"><div class="field"><label>Document name *</label><input id="dName" required></div><div class="field"><label>Customer</label><select id="dCustomer"><option value="">Internal / no customer</option></select></div><div class="field"><label>Type</label><select id="dType"><option>Quotation</option><option>Requirements</option><option>Contract</option><option>Invoice</option><option>Handover</option><option>Other</option></select></div><div class="field"><label>Status</label><select id="dStatus"><option>Draft</option><option>Internal</option><option>Sent</option><option>Approved</option></select></div></div><button class="btn gold" style="margin-top:16px">Add Document</button></form></div></div>
 <div class="modal" id="taskModal"><div class="modal-box"><div class="modal-head"><h3>New Task</h3><button class="close" onclick="closeModal('taskModal')">×</button></div><form onsubmit="addTask(event)"><div class="formgrid"><div class="field full"><label>Task *</label><input id="tName" required></div><div class="field"><label>Due</label><input id="tDue" type="date"></div><div class="field"><label>Status</label><select id="tStatus"><option>To do</option><option>In progress</option><option>Ready</option><option>Done</option></select></div></div><button class="btn gold" style="margin-top:16px">Add Task</button></form></div></div>
@@ -182,19 +182,33 @@ const emptyData={customers:[],leads:[],consultations:[],requirements:[],projects
 const DATA_KEY='hetzenBusinessDataV2';
 function sanitizeData(input){
   const empty={customers:[],leads:[],consultations:[],requirements:[],projects:[],quotes:[],invoices:[],documents:[],tasks:[],support:[],forms:[],automations:[]};
-  const out={...empty,...(input||{})};
-  const isSynthetic=(value)=>/example\\.co\\.za|000 0000|sample|demo|fake|placeholder/i.test(String(value||''));
+  const out={...empty,...(input&&typeof input==='object'?input:{})};
   Object.keys(empty).forEach(k=>{
     if(!Array.isArray(out[k])) out[k]=[];
-    if(['customers','leads','consultations','requirements','projects','quotes','invoices','documents','tasks','support'].includes(k)){
-      out[k]=out[k].filter(row=>!Object.values(row||{}).some(isSynthetic));
-    }
+    else out[k]=out[k].map(row=>row&&typeof row==='object'?row:{});
   });
   return out;
 }
-function load(){try{const x=JSON.parse(localStorage.getItem(DATA_KEY)||'null');return sanitizeData(x||emptyData)}catch(e){return sanitizeData(emptyData)}}
+function makeStableId(prefix){if(window.crypto&&crypto.randomUUID)return String(prefix||'REC').toUpperCase()+'-'+crypto.randomUUID();return String(prefix||'REC').toUpperCase()+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9)}
+function migrateBusinessData(data){
+  const d=sanitizeData(data);
+  d.customers.forEach(c=>{if(!c.id)c.id=makeStableId('CUS')});
+  const byName=new Map(d.customers.map(c=>[String(c.name||'').trim().toLowerCase(),c]));
+  d.leads.forEach(l=>{if(!l.id)l.id=makeStableId('LEAD')});
+  ['consultations','requirements','projects','quotes','invoices','documents','tasks','support'].forEach(k=>d[k].forEach(x=>{const c=byName.get(String(x.customer||x.business||'').trim().toLowerCase());if(c)x.customerId=x.customerId||c.id}));
+  d.leads.forEach(l=>{const c=byName.get(String(l.name||'').trim().toLowerCase());if(c)l.customerId=l.customerId||c.id});
+  d._documentCounters=d._documentCounters&&typeof d._documentCounters==='object'?d._documentCounters:{};
+  return d;
+}
+function load(){try{const x=JSON.parse(localStorage.getItem(DATA_KEY)||'null');return migrateBusinessData(x||emptyData)}catch(e){return migrateBusinessData(emptyData)}}
 let db=load();
-function persist(){localStorage.setItem(DATA_KEY,JSON.stringify(db));renderAll();if(window.hetzenCloudSave)window.hetzenCloudSave()}
+function persist(){
+  db=migrateBusinessData(db);
+  localStorage.setItem(DATA_KEY,JSON.stringify(db));
+  localStorage.setItem('hetzenSyncMetaV1',JSON.stringify({...readSyncMeta(),pending:true}));
+  renderAll();
+  if(window.hetzenCloudSave)window.hetzenCloudSave()
+}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const p=document.getElementById(id);if(p)p.classList.add('active');document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById('title').textContent=titles[id]||'Hetzen Portal';scrollTo({top:0,behavior:'smooth'});renderAll()}
 function openMobileNav(){document.querySelector('.side')?.classList.add('open');document.getElementById('mobileOverlay')?.classList.add('open');document.body.style.overflow='hidden'}function closeMobileNav(){document.querySelector('.side')?.classList.remove('open');document.getElementById('mobileOverlay')?.classList.remove('open');document.body.style.overflow=''}document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileNav()});document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>{go(x.dataset.page);closeMobileNav()}));
@@ -299,7 +313,7 @@ function renderAll(){renderDashboard();renderCustomers();renderLeads();renderCon
 function refreshCustomerSelects(){const fields=['qCustomer','iCustomer','dCustomer','sCustomer','pCustomer','rqCustomer'];fields.forEach(id=>{const el=document.getElementById(id);if(!el)return;const current=el.value;const optional=id==='dCustomer';el.innerHTML=(optional?'<option value="">Internal / no customer</option>':'<option value="">Select existing customer</option>')+db.customers.filter(c=>c.status!=='Archived').map(c=>'<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>').join('');if(current&&db.customers.some(c=>c.status!=='Archived'&&c.name===current))el.value=current});}
 function addCustomer(e){e.preventDefault();const name=cName.value.trim();const existing=db.customers.find(c=>String(c.name||'').trim().toLowerCase()===name.toLowerCase());if(existing){if(existing.status==='Archived'){existing.status='Active';existing.updatedAt=new Date().toISOString();persist();e.target.reset();refreshCustomerSelects();closeModal('customerModal');toast('Archived customer restored');return}toast('A customer with this name already exists. Open the existing customer instead.');return}db.customers.unshift({name,contact:cContact.value.trim(),phone:cPhone.value.trim(),email:cEmail.value.trim(),industry:cIndustry.value.trim(),services:'Not assigned',projects:0,status:'Active',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});persist();e.target.reset();refreshCustomerSelects();closeModal('customerModal');toast('Customer added')}
 function addLead(e){e.preventDefault();db.leads.unshift({name:lName.value,source:lSource.value,need:lNeed.value||'Needs discovery',stage:lStage.value,action:lAction.value||'Follow up'});persist();e.target.reset();closeModal('leadModal');toast('Lead added')}
-function addQuote(e){e.preventDefault();db.quotes.unshift({id:'HT-'+(105+db.quotes.length),customer:qCustomer.value,items:qService.value,amount:Number(qAmount.value),status:qStatus.value});persist();e.target.reset();closeModal('quoteModal');toast('Quote created')}
+function addQuote(e){e.preventDefault();db.quotes.unshift({id:'HT-'+(105+db.quotes.length),customer:qCustomer.value,items:qService.value,amount:Number(qAmount.value),status:qStatus.value,expiryDate:(document.getElementById('qExpiry')?.value||'')});persist();e.target.reset();closeModal('quoteModal');toast('Quote created')}
 function addInvoice(e){e.preventDefault();db.invoices.unshift({id:'INV-'+(19+db.invoices.length),customer:iCustomer.value,amount:Number(iAmount.value),due:iDue.value||'—',status:iStatus.value});persist();e.target.reset();refreshCustomerSelects();closeModal('invoiceModal');toast('Invoice created')}
 function addDocument(e){e.preventDefault();db.documents.unshift({name:dName.value,customer:dCustomer.value,type:dType.value,status:dStatus.value});persist();e.target.reset();closeModal('documentModal');toast('Document added')}
 function addTask(e){e.preventDefault();db.tasks.unshift({name:tName.value,due:tDue.value||'—',status:tStatus.value});persist();e.target.reset();closeModal('taskModal');toast('Task added')}
@@ -316,7 +330,7 @@ function cycleSupport(i){const x=db.support[i];const arr=['Open','Working','Wait
 function toggleForm(i){db.forms[i].status=db.forms[i].status==='Active'?'Disabled':'Active';persist()}function toggleAutomation(i){db.automations[i].status=db.automations[i].status==='On'?'Off':'On';persist()}
 function setTheme(theme){document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('hetzenTheme',theme);['Light','Dark','System'].forEach(x=>{const el=document.getElementById('theme'+x);if(el)el.classList.toggle('active',theme===x.toLowerCase())});toast(theme==='system'?'Device theme selected':theme==='dark'?'Dark mode selected':'Light mode selected')}
 function initTheme(){setTheme(localStorage.getItem('hetzenTheme')||'system')}
-function saveSettings(){localStorage.setItem('hetzenSettings',JSON.stringify({company:setCompany.value,tagline:setTagline.value,description:setDescription.value,email:'midimetjasilas93@gmail.com',phone:'081 300 4634'}));if(window.hetzenCloudSave)window.hetzenCloudSave();toast('Settings saved in your Hetzen workspace')}
+function saveSettings(){localStorage.setItem('hetzenSettings',JSON.stringify({company:setCompany.value,tagline:setTagline.value,description:setDescription.value,email:(document.getElementById('setEmail')?.value||'').trim(),phone:(document.getElementById('setPhone')?.value||'').trim()}));if(window.hetzenCloudSave)window.hetzenCloudSave();toast('Settings saved in your Hetzen workspace')}
 function buildConsultServices(selected=[]){document.getElementById('consultServices').innerHTML=services.map(s=>`<label class="service"><input type="checkbox" value="${s[0]}" ${selected.includes(s[0])?'checked':''} onchange="updateConsultQuestions()"><b>${s[1]}</b><p>${s[2]}</p></label>`).join('');updateConsultQuestions()}
 function updateConsultQuestions(){const vals=[...document.querySelectorAll('#consultServices input:checked')].map(x=>x.value);let h='';vals.forEach(v=>{const s=services.find(x=>x[0]===v);h+=`<div class="panel" style="margin-top:14px"><h3>${s[1]}</h3><div class="formgrid">${serviceQuestions[v].map((q,i)=>`<div class="field ${i===serviceQuestions[v].length-1?'full':''}"><label>${q}</label><input data-consult="${v}" placeholder="Enter details..."></div>`).join('')}</div></div>`});if(vals.includes('web')||vals.includes('software')||vals.includes('ai'))h+=`<div class="panel" style="margin-top:14px"><h3>Universal Business Discovery</h3><p style="color:#666;font-size:13px">The same customer can have multiple services. Hetzen keeps all selected services under one engagement.</p><div class="checkgrid"><label class="check"><input type="checkbox"> Existing website</label><label class="check"><input type="checkbox"> WhatsApp Business</label><label class="check"><input type="checkbox"> Social media</label><label class="check"><input type="checkbox"> Existing software / POS</label></div></div>`;document.getElementById('dynamicConsult').innerHTML=h}
 function openConsultation(){document.getElementById('consultModal').classList.add('open');buildConsultServices()}
@@ -347,81 +361,41 @@ function init(){initTheme();const saved=JSON.parse(localStorage.getItem('hetzenS
 
 
 <script>
-/* HETZEN FINAL — Supabase cloud authentication + business-state sync */
 (function(){
-  const cfg=window.HETZEN_CONFIG||{};
-  if(!window.supabase||!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){console.error('Supabase configuration missing');return;}
-  const client=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-  window.hetzenSupabase=client;
-  let saveTimer=null; window.hetzenSaveTimer=null;
-  let booted=false;
-  const gate=document.getElementById('authGate'), err=document.getElementById('authError'), status=document.getElementById('authStatus');
-  function showError(msg){if(err){err.textContent=msg;err.style.display='block'}}
-  function clearError(){if(err){err.textContent='';err.style.display='none'}}
-  function setStatus(msg){if(status)status.textContent=msg||''}
-  function setSignedIn(on,email){
-    if(gate)gate.classList.toggle('auth-hidden',!!on);
-    const badge=document.getElementById('cloudBadge'); if(badge)badge.textContent=on?'● CLOUD SYNCED':'● CLOUD';
-    const emailField=document.getElementById('setEmail'); if(emailField&&email)emailField.value=email;
-  }
-  async function loadCloud(user){
-    const {data,error}=await client.from('portal_state').select('data,settings,report_history').eq('owner_id',user.id).maybeSingle();
-    if(error) throw error;
-    if(data&&data.data){
-      db=sanitizeData(data.data);
-      localStorage.setItem(DATA_KEY,JSON.stringify(db));
-      await saveCloudNow(user);
-      if(data.settings){localStorage.setItem('hetzenSettings',JSON.stringify(data.settings));const s=data.settings;if(document.getElementById('setCompany'))setCompany.value=s.company||setCompany.value;if(document.getElementById('setTagline'))setTagline.value=s.tagline||setTagline.value;if(document.getElementById('setDescription'))setDescription.value=s.description||setDescription.value}
-      if(data.report_history)localStorage.setItem('hetzenReportHistory',JSON.stringify(data.report_history));
-      renderAll();
-      return;
-    }
-    await saveCloudNow(user);
-  }
-  async function saveCloudNow(userOverride){
-    const user=userOverride||(await client.auth.getUser()).data.user;
-    if(!user)return;
-    const settings=JSON.parse(localStorage.getItem('hetzenSettings')||'null');
-    const report_history=JSON.parse(localStorage.getItem('hetzenReportHistory')||'[]');
-    const payload={owner_id:user.id,data:db,settings,report_history,updated_at:new Date().toISOString()};
-    const {error}=await client.from('portal_state').upsert(payload,{onConflict:'owner_id'});
-    if(error)throw error;
-    localStorage.setItem(DATA_KEY,JSON.stringify(db));
-  }
-  window.hetzenCloudSave=function(){
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(async()=>{try{await saveCloudNow();const b=document.getElementById('cloudBadge');if(b)b.textContent='● CLOUD SYNCED'}catch(e){console.error(e);const b=document.getElementById('cloudBadge');if(b)b.textContent='● LOCAL FALLBACK'}} ,350);
-  };
-  window.logoutPortal=async function(){await client.auth.signOut();location.reload()};
-  window.resetPortalPassword=async function(){
-    clearError();const email=(document.getElementById('authEmail')?.value||'').trim();
-    if(!email){showError('Enter your account email first.');return;}
-    setStatus('Sending password reset email...');
-    const redirect=location.origin+location.pathname;
-    const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:redirect});
-    if(error)showError(error.message);else setStatus('Password reset email sent. Check your inbox.');
-  };
-  document.getElementById('loginForm')?.addEventListener('submit',async e=>{
-    e.preventDefault();clearError();const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';
-    const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;
-    const {data,error}=await client.auth.signInWithPassword({email,password});
-    if(error){showError(error.message);btn.disabled=false;btn.textContent='Sign In';return}
-    try{setStatus('Loading your Hetzen business data...');await loadCloud(data.user);setSignedIn(true,data.user.email);booted=true;renderAll();}
-    catch(e2){showError('Signed in, but the business database could not be loaded. Run the Supabase portal schema SQL, then try again.');console.error(e2)}
-    btn.disabled=false;btn.textContent='Sign In';
-  });
-  client.auth.getSession().then(async({data})=>{
-    if(data.session){try{await loadCloud(data.session.user);setSignedIn(true,data.session.user.email);booted=true;renderAll()}catch(e){showError('Your login works, but the cloud database is not ready yet. Run the portal schema SQL.');console.error(e)}}
-  });
-  client.auth.onAuthStateChange((_event,session)=>{if(!session){setSignedIn(false)}else if(!booted){loadCloud(session.user).then(()=>{setSignedIn(true,session.user.email);booted=true;renderAll()}).catch(console.error)}});
-  window.addEventListener('online',()=>{if(booted)window.hetzenCloudSave()});
+const cfg=window.HETZEN_CONFIG||{},KEY='hetzenSyncMetaV1';const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}};window.readSyncMeta=read;
+const write=x=>localStorage.setItem(KEY,JSON.stringify({...read(),...x}));const gate=document.getElementById('authGate'),err=document.getElementById('authError'),status=document.getElementById('authStatus');
+const badge=x=>{const b=document.getElementById('cloudBadge');if(b)b.textContent=x};const pwa=x=>{const b=document.getElementById('pwaStatus');if(b)b.textContent=x};const signed=x=>gate&&gate.classList.toggle('auth-hidden',!!x);
+let client=null;
+function showConflict(){let b=document.getElementById('syncConflictBanner');if(!b){b=document.createElement('div');b.id='syncConflictBanner';b.className='notice no-print';b.style.cssText='position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:1000;width:min(760px,calc(100% - 30px));box-shadow:0 12px 35px rgba(0,0,0,.16)';document.body.appendChild(b)}
+b.innerHTML='<strong>OUT OF DATE</strong><div style="margin-top:5px">Cloud data changed on another device or tab. Your local changes are preserved and were not uploaded.</div><div class="backup-actions" style="margin-top:9px"><button class="btn light" id="syncReloadBtn">Reload</button><button class="btn gold" id="syncDownloadBtn">Download my changes</button><button class="btn light" id="syncDismissBtn">Dismiss</button></div>';
+b.querySelector('#syncDownloadBtn').onclick=()=>window.downloadUnsyncedBackup();b.querySelector('#syncDismissBtn').onclick=()=>b.remove();b.querySelector('#syncReloadBtn').onclick=async()=>{b.remove();try{await loadCloud((await client.auth.getUser()).data.user);toast('Cloud version reloaded')}catch(e){toast('Reload failed: check your connection')}}}
+async function current(){return client?(await client.auth.getUser()).data.user:null}
+async function row(u){const r=await client.from('portal_state').select('data,settings,report_history,updated_at').eq('owner_id',u.id).maybeSingle();if(r.error)throw r.error;return r.data}
+async function saveNow(u){
+if(!u)return false;if(!navigator.onLine){write({pending:true,offline:true});badge('● OFFLINE');pwa('Offline • Working locally; changes sync later');return false}
+const m=read(),r=await row(u),remote=r?.updated_at||null;if(m.pending&&remote!==m.lastSyncedAt){write({conflict:true});badge('● OUT OF DATE');showConflict();return false}
+db=migrateBusinessData(db);db._documentCounters=JSON.parse(localStorage.getItem('hetzenDocumentCounters')||JSON.stringify(db._documentCounters||{}));
+const updated_at=new Date().toISOString(),settings=JSON.parse(localStorage.getItem('hetzenSettings')||'null'),report_history=JSON.parse(localStorage.getItem('hetzenReportHistory')||'[]');
+const z=await client.from('portal_state').upsert({owner_id:u.id,data:db,settings,report_history,updated_at},{onConflict:'owner_id'});if(z.error)throw z.error;
+localStorage.setItem(DATA_KEY,JSON.stringify(db));localStorage.setItem('hetzenLastCloudSaveAt',updated_at);write({lastSyncedAt:updated_at,pending:false,conflict:false,offline:false,lastSavedAt:updated_at});badge('● CLOUD SYNCED');pwa('Online • Cloud sync enabled');return true}
+async function loadCloud(u){
+if(!navigator.onLine){signed(true);badge('● OFFLINE');pwa('Offline • Working locally; changes sync later');renderAll();return}
+const r=await row(u),m=read();if(r?.data){if(m.pending){if(r.updated_at!==m.lastSyncedAt){write({conflict:true});badge('● OUT OF DATE');showConflict();signed(true);renderAll();return}await saveNow(u)}else{db=migrateBusinessData(r.data);localStorage.setItem(DATA_KEY,JSON.stringify(db));if(r.settings)localStorage.setItem('hetzenSettings',JSON.stringify(r.settings));if(r.report_history)localStorage.setItem('hetzenReportHistory',JSON.stringify(r.report_history));if(db._documentCounters)localStorage.setItem('hetzenDocumentCounters',JSON.stringify(db._documentCounters));write({lastSyncedAt:r.updated_at||null,pending:false,conflict:false});renderAll()}}else{const has=Object.keys(db).some(k=>Array.isArray(db[k])&&db[k].length);if(has){write({pending:true});await saveNow(u)}else{write({pending:false,lastSyncedAt:null});renderAll()}}signed(true)}
+window.hetzenCloudSave=function(){clearTimeout(window.hetzenSaveTimer);if(!read().pending)return;window.hetzenSaveTimer=setTimeout(async()=>{try{await saveNow(await current())}catch(e){write({pending:true,offline:!navigator.onLine});badge(navigator.onLine?'● LOCAL CHANGES':'● OFFLINE');pwa(navigator.onLine?'Online • Changes waiting to sync':'Offline • Working locally; changes sync later');toast(navigator.onLine?'Cloud save failed; your changes remain on this device.':'Offline; changes will sync later.')}},350)};
+window.downloadUnsyncedBackup=function(){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({format:'Hetzen Unsynced Backup',exportedAt:new Date().toISOString(),data:migrateBusinessData(db),settings:JSON.parse(localStorage.getItem('hetzenSettings')||'null')},null,2)],{type:'application/json'}));a.href=u;a.download='hetzen-unsynced-changes.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)};
+window.logoutPortal=async function(){if(read().pending){showConflict();toast('Sync your changes before logging out.');return}try{await client.auth.signOut();Object.keys(localStorage).filter(k=>/^hetzenBusinessDataV2$|^hetzenSyncMetaV1$|^hetzenDocumentCounters$|^hetzenReportHistory$|^hetzenLastDocument/.test(k)).forEach(k=>localStorage.removeItem(k));location.reload()}catch(e){toast('Logout failed; please try again.')}};
+window.resetPortalPassword=async function(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email){err.textContent='Enter your account email first.';err.style.display='block';return}status.textContent='Sending password reset email...';const r=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(r.error){err.textContent='Password reset failed. Please check your connection.';err.style.display='block'}else status.textContent='Password reset email sent. Check your inbox.'};
+const login=async e=>{e.preventDefault();err.style.display='none';const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';const r=await client.auth.signInWithPassword({email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value});if(r.error){err.textContent=r.error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}try{await loadCloud(r.data.user)}catch(x){signed(true);badge('● CLOUD ERROR');renderAll();err.textContent='Signed in, but cloud data could not be loaded. Your local copy is preserved.';err.style.display='block'}btn.disabled=false;btn.textContent='Sign In'};
+client=window.supabase&&cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;window.hetzenSupabase=client;
+if(client){document.getElementById('loginForm')?.addEventListener('submit',login);client.auth.getSession().then(async r=>{if(r.data.session){try{await loadCloud(r.data.session.user)}catch(e){signed(true);badge(navigator.onLine?'● CLOUD ERROR':'● OFFLINE');renderAll()}}});client.auth.onAuthStateChange((_e,s)=>{if(!s)signed(false)})}else{signed(true);badge('● LOCAL MODE');pwa('Offline • Working locally; changes sync later');renderAll()}
+window.addEventListener('online',async()=>{pwa('Online • Reconnecting to cloud...');if(client){try{await saveNow(await current())}catch(e){toast('Back online; cloud sync is still waiting.')}}});window.addEventListener('offline',()=>{badge('● OFFLINE');pwa('Offline • Working locally; changes sync later')});
 })();
 </script>
 <script>
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;const b=document.getElementById('installBtn');if(b)b.classList.add('show')});
 async function installPWA(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;const b=document.getElementById('installBtn');if(b)b.classList.remove('show')}
-function updatePwaStatus(){const el=document.getElementById('pwaStatus');if(!el)return;el.textContent=navigator.onLine?'Online • Offline-ready':'Offline • Data stays on this device';el.classList.toggle('online',navigator.onLine)}
+function updatePwaStatus(){const el=document.getElementById('pwaStatus');if(!el)return;el.textContent=navigator.onLine?'Online • Cloud sync enabled':'Offline • Working locally; changes sync later';el.classList.toggle('online',navigator.onLine)}
 window.addEventListener('online',updatePwaStatus);window.addEventListener('offline',updatePwaStatus);updatePwaStatus();
 
 </script>
@@ -722,8 +696,9 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
         db.automations.push({trigger:r.trigger,action:r.action,review:'No',status:'On',systemKey:r.key,system:true});
     });
   }
-  function save(){persist()}
-  function ensureCustomerOnboarding(name){
+  function enabled(key){const r=db.automations?.find(a=>a.systemKey===key);return !r||r.status!=='Off'}
+function save(){persist()}
+  function ensureCustomerOnboarding(name){if(!enabled('customer_onboarding'))return;
     const key='customer-onboarding:'+clean(name).toLowerCase();
     addProjectOnce('Customer onboarding — '+name,name,'General business onboarding',0,key);
     addTaskOnce('Review new customer and confirm requirements',name,key+':task');
@@ -748,7 +723,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       const industry=clean(document.getElementById('coIndustry')?.value);
       const before=db.consultations.length;
       originalConsult(e);
-      if(db.consultations.length>before){
+      if(db.consultations.length>before && enabled('consultation_to_project')){
         let c=customer(business);
         if(!c){
           c={name:business,contact:contact||'—',phone:phone||'—',email:'',industry:industry||'—',services:db.consultations[0].services||'Not assigned',projects:0,status:'Active'};
@@ -778,7 +753,7 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       }
     };
   }
-  function acceptQuote(q){
+  function acceptQuote(q){if(!enabled('quote_accepted'))return;
     const key='quote-accepted:'+clean(q.id);
     const p=addProjectOnce('Project — '+q.customer,q.customer,q.items,q.amount,key);
     q.projectId=p&&p.automationKey||key;
@@ -818,10 +793,10 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       originalAdvance(i);
       const now=db.projects[i];
       if(!now)return;
-      if(before!=='Handover' && now.status==='Handover'){
+      if(enabled('project_handover') && before!=='Handover' && now.status==='Handover'){
         addTaskOnce('Prepare handover and final invoice',now.customer,'handover:'+clean(now.name).toLowerCase());
       }
-      if(before!=='Complete' && now.status==='Complete'){
+      if(enabled('project_complete') && before!=='Complete' && now.status==='Complete'){
         const key='project-complete:'+clean(now.name).toLowerCase();
         if(Number(now.amount)>0){
           const paidDeposit=db.invoices.filter(x=>same(x.customer,now.customer)&&x.projectId===now.automationKey).reduce((a,x)=>a+Number(x.amount||0),0);
@@ -841,11 +816,20 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
       const before=db.invoices[i]?.status;
       originalCycleInvoice(i);
       const inv=db.invoices[i];
-      if(inv && before!=='Paid' && inv.status==='Paid'){
+      if(inv && before!=='Paid' && inv.status==='Paid' && enabled('invoice_paid')){
         addTaskOnce('Payment received — update customer/project records',inv.customer,'payment:'+clean(inv.id));
         if(inv.projectId){
           const p=db.projects.find(x=>x.automationKey===inv.projectId);
-          if(p && p.status!=='Complete' && Number(p.progress)>=80)p.status='Complete';
+          const linked=db.invoices.filter(x=>x.projectId===inv.projectId);
+          const allPaid=linked.length>0&&linked.every(x=>x.status==='Paid');
+          const paidTotal=linked.filter(x=>x.status==='Paid').reduce((a,x)=>a+Number(x.amount||0),0);
+          const projectAmount=Number(p?.amount||0);
+          if(p && p.status==='Handover' && allPaid && paidTotal>=projectAmount){
+            p.status='Complete';p.progress=100;
+            addTaskOnce('Confirm handover and customer sign-off',p.customer,'project-complete:'+clean(p.name).toLowerCase()+':signoff');
+            const req=db.requirements.find(r=>same(r.customer,p.customer));
+            if(req)req.status='Complete';
+          }
         }
       }
       ensureRules();save();
@@ -1136,4 +1120,4 @@ window.addEventListener('online',updatePwaStatus);window.addEventListener('offli
   document.addEventListener('DOMContentLoaded',()=>setTimeout(renderRequirementsLifecycle,0));
 })();
 </script>
-</body></html>
+<script src="portal-hardening.js"></script></body></html>
