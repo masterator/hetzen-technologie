@@ -78,7 +78,7 @@ try{
   for(const [name,fn] of tests) await capture(page,fn,name,{width:1440,height:1000});
 
   const invoiceFirst=await page.evaluate(()=>{window.generateInvoicePDF(0);return document.getElementById('printSheet').dataset.documentNumber});
-  await page.waitForSelector('#printSheet');
+  await page.waitForSelector('#printSheet',{state:'attached'});
   await wait(100);
   const invoiceSecond=await page.evaluate(()=>{window.generateInvoicePDF(0);return document.getElementById('printSheet').dataset.documentNumber});
   if(invoiceFirst!==invoiceSecond) throw new Error('Invoice number changed on reprint');
@@ -104,7 +104,7 @@ try{
     ['requirements-mobile',()=>window.generateRequirementsPDF(0)]
   ]) await capture(mobile,fn,name,{width:390,height:844});
 
-  const visible=await mobile.emulateMedia({media:'print'}); await mobile.locator('#printSheet').evaluate(el=>getComputedStyle(el).display!=='none');
+  await mobile.emulateMedia({media:'print'}); const visible=await mobile.locator('#printSheet').evaluate(el=>getComputedStyle(el).display!=='none');
   if(!visible) throw new Error('Mobile print sheet is hidden');
   console.log('DOCUMENT BROWSER TESTS PASSED');
 } finally {
