@@ -45,7 +45,8 @@ async function seed(page){
 async function capture(page,fn,name,viewport){
   await page.setViewportSize(viewport);
   await page.evaluate(fn);
-  await page.waitForSelector('#printSheet');
+  await page.waitForSelector('#printSheet',{state:'attached'});
+  await page.emulateMedia({media:'print'});
   const text=await page.locator('#printSheet').innerText();
   const html=await page.locator('#printSheet').innerHTML();
   if(text.includes('—')) throw new Error(name+': contains em dash');
@@ -57,6 +58,7 @@ async function capture(page,fn,name,viewport){
   if(!html.includes('hetzen-logo-transparent.png')) throw new Error(name+': missing logo');
   await page.screenshot({path:`${artifacts}/${name}.png`,fullPage:true});
   await page.pdf({path:`${artifacts}/${name}.pdf`,format:'A4',printBackground:true});
+  await page.emulateMedia({media:'screen'});
   return {text,html};
 }
 
@@ -82,7 +84,7 @@ try{
   if(invoiceFirst!==invoiceSecond) throw new Error('Invoice number changed on reprint');
 
   const quoteFirst=await page.evaluate(()=>{window.generateQuotePDF(0);return document.getElementById('printSheet').dataset.documentNumber});
-  await page.waitForSelector('#printSheet'); await wait(100);
+  await page.waitForSelector('#printSheet',{state:'attached'}); await wait(100);
   const quoteSecond=await page.evaluate(()=>{window.generateQuotePDF(0);return document.getElementById('printSheet').dataset.documentNumber});
   if(quoteFirst!==quoteSecond) throw new Error('Quote number changed on reprint');
 
@@ -102,7 +104,7 @@ try{
     ['requirements-mobile',()=>window.generateRequirementsPDF(0)]
   ]) await capture(mobile,fn,name,{width:390,height:844});
 
-  const visible=await mobile.locator('#printSheet').evaluate(el=>getComputedStyle(el).display!=='none');
+  const visible=await mobile.emulateMedia({media:'print'}); await mobile.locator('#printSheet').evaluate(el=>getComputedStyle(el).display!=='none');
   if(!visible) throw new Error('Mobile print sheet is hidden');
   console.log('DOCUMENT BROWSER TESTS PASSED');
 } finally {
