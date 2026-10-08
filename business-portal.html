@@ -361,74 +361,34 @@ function init(){initTheme();const saved=JSON.parse(localStorage.getItem('hetzenS
 
 
 <script>
-/* HETZEN FINAL — Supabase cloud authentication + business-state sync */
 (function(){
-  const cfg=window.HETZEN_CONFIG||{};
-  if(!window.supabase||!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){console.error('Supabase configuration missing');return;}
-  const client=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-  window.hetzenSupabase=client;
-  let saveTimer=null; window.hetzenSaveTimer=null;
-  let booted=false;
-  const gate=document.getElementById('authGate'), err=document.getElementById('authError'), status=document.getElementById('authStatus');
-  function showError(msg){if(err){err.textContent=msg;err.style.display='block'}}
-  function clearError(){if(err){err.textContent='';err.style.display='none'}}
-  function setStatus(msg){if(status)status.textContent=msg||''}
-  function setSignedIn(on,email){
-    if(gate)gate.classList.toggle('auth-hidden',!!on);
-    const badge=document.getElementById('cloudBadge'); if(badge)badge.textContent=on?'● CLOUD SYNCED':'● CLOUD';
-    const emailField=document.getElementById('setEmail'); if(emailField&&email)emailField.value=email;
-  }
-  async function loadCloud(user){
-    const {data,error}=await client.from('portal_state').select('data,settings,report_history').eq('owner_id',user.id).maybeSingle();
-    if(error) throw error;
-    if(data&&data.data){
-      db=sanitizeData(data.data);
-      localStorage.setItem(DATA_KEY,JSON.stringify(db));
-      await saveCloudNow(user);
-      if(data.settings){localStorage.setItem('hetzenSettings',JSON.stringify(data.settings));const s=data.settings;if(document.getElementById('setCompany'))setCompany.value=s.company||setCompany.value;if(document.getElementById('setTagline'))setTagline.value=s.tagline||setTagline.value;if(document.getElementById('setDescription'))setDescription.value=s.description||setDescription.value}
-      if(data.report_history)localStorage.setItem('hetzenReportHistory',JSON.stringify(data.report_history));
-      renderAll();
-      return;
-    }
-    await saveCloudNow(user);
-  }
-  async function saveCloudNow(userOverride){
-    const user=userOverride||(await client.auth.getUser()).data.user;
-    if(!user)return;
-    const settings=JSON.parse(localStorage.getItem('hetzenSettings')||'null');
-    const report_history=JSON.parse(localStorage.getItem('hetzenReportHistory')||'[]');
-    const payload={owner_id:user.id,data:db,settings,report_history,updated_at:new Date().toISOString()};
-    const {error}=await client.from('portal_state').upsert(payload,{onConflict:'owner_id'});
-    if(error)throw error;
-    localStorage.setItem(DATA_KEY,JSON.stringify(db));
-  }
-  window.hetzenCloudSave=function(){
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(async()=>{try{await saveCloudNow();const b=document.getElementById('cloudBadge');if(b)b.textContent='● CLOUD SYNCED'}catch(e){console.error(e);const b=document.getElementById('cloudBadge');if(b)b.textContent='● LOCAL FALLBACK'}} ,350);
-  };
-  window.logoutPortal=async function(){await client.auth.signOut();location.reload()};
-  window.resetPortalPassword=async function(){
-    clearError();const email=(document.getElementById('authEmail')?.value||'').trim();
-    if(!email){showError('Enter your account email first.');return;}
-    setStatus('Sending password reset email...');
-    const redirect=location.origin+location.pathname;
-    const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:redirect});
-    if(error)showError(error.message);else setStatus('Password reset email sent. Check your inbox.');
-  };
-  document.getElementById('loginForm')?.addEventListener('submit',async e=>{
-    e.preventDefault();clearError();const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';
-    const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;
-    const {data,error}=await client.auth.signInWithPassword({email,password});
-    if(error){showError(error.message);btn.disabled=false;btn.textContent='Sign In';return}
-    try{setStatus('Loading your Hetzen business data...');await loadCloud(data.user);setSignedIn(true,data.user.email);booted=true;renderAll();}
-    catch(e2){showError('Signed in, but the business database could not be loaded. Run the Supabase portal schema SQL, then try again.');console.error(e2)}
-    btn.disabled=false;btn.textContent='Sign In';
-  });
-  client.auth.getSession().then(async({data})=>{
-    if(data.session){try{await loadCloud(data.session.user);setSignedIn(true,data.session.user.email);booted=true;renderAll()}catch(e){showError('Your login works, but the cloud database is not ready yet. Run the portal schema SQL.');console.error(e)}}
-  });
-  client.auth.onAuthStateChange((_event,session)=>{if(!session){setSignedIn(false)}else if(!booted){loadCloud(session.user).then(()=>{setSignedIn(true,session.user.email);booted=true;renderAll()}).catch(console.error)}});
-  window.addEventListener('online',()=>{if(booted)window.hetzenCloudSave()});
+const cfg=window.HETZEN_CONFIG||{},KEY='hetzenSyncMetaV1';const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}};window.readSyncMeta=read;
+const write=x=>localStorage.setItem(KEY,JSON.stringify({...read(),...x}));const gate=document.getElementById('authGate'),err=document.getElementById('authError'),status=document.getElementById('authStatus');
+const badge=x=>{const b=document.getElementById('cloudBadge');if(b)b.textContent=x};const pwa=x=>{const b=document.getElementById('pwaStatus');if(b)b.textContent=x};const signed=x=>gate&&gate.classList.toggle('auth-hidden',!!x);
+let client=null;
+function showConflict(){let b=document.getElementById('syncConflictBanner');if(!b){b=document.createElement('div');b.id='syncConflictBanner';b.className='notice no-print';b.style.cssText='position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:1000;width:min(760px,calc(100% - 30px));box-shadow:0 12px 35px rgba(0,0,0,.16)';document.body.appendChild(b)}
+b.innerHTML='<strong>OUT OF DATE</strong><div style="margin-top:5px">Cloud data changed on another device or tab. Your local changes are preserved and were not uploaded.</div><div class="backup-actions" style="margin-top:9px"><button class="btn light" id="syncReloadBtn">Reload</button><button class="btn gold" id="syncDownloadBtn">Download my changes</button><button class="btn light" id="syncDismissBtn">Dismiss</button></div>';
+b.querySelector('#syncDownloadBtn').onclick=()=>window.downloadUnsyncedBackup();b.querySelector('#syncDismissBtn').onclick=()=>b.remove();b.querySelector('#syncReloadBtn').onclick=async()=>{b.remove();try{await loadCloud((await client.auth.getUser()).data.user);toast('Cloud version reloaded')}catch(e){toast('Reload failed: check your connection')}}}
+async function current(){return client?(await client.auth.getUser()).data.user:null}
+async function row(u){const r=await client.from('portal_state').select('data,settings,report_history,updated_at').eq('owner_id',u.id).maybeSingle();if(r.error)throw r.error;return r.data}
+async function saveNow(u){
+if(!u)return false;if(!navigator.onLine){write({pending:true,offline:true});badge('● OFFLINE');pwa('Offline • Working locally; changes sync later');return false}
+const m=read(),r=await row(u),remote=r?.updated_at||null;if(m.pending&&remote!==m.lastSyncedAt){write({conflict:true});badge('● OUT OF DATE');showConflict();return false}
+db=migrateBusinessData(db);db._documentCounters=JSON.parse(localStorage.getItem('hetzenDocumentCounters')||JSON.stringify(db._documentCounters||{}));
+const updated_at=new Date().toISOString(),settings=JSON.parse(localStorage.getItem('hetzenSettings')||'null'),report_history=JSON.parse(localStorage.getItem('hetzenReportHistory')||'[]');
+const z=await client.from('portal_state').upsert({owner_id:u.id,data:db,settings,report_history,updated_at},{onConflict:'owner_id'});if(z.error)throw z.error;
+localStorage.setItem(DATA_KEY,JSON.stringify(db));localStorage.setItem('hetzenLastCloudSaveAt',updated_at);write({lastSyncedAt:updated_at,pending:false,conflict:false,offline:false,lastSavedAt:updated_at});badge('● CLOUD SYNCED');pwa('Online • Cloud sync enabled');return true}
+async function loadCloud(u){
+if(!navigator.onLine){signed(true);badge('● OFFLINE');pwa('Offline • Working locally; changes sync later');renderAll();return}
+const r=await row(u),m=read();if(r?.data){if(m.pending){if(r.updated_at!==m.lastSyncedAt){write({conflict:true});badge('● OUT OF DATE');showConflict();signed(true);renderAll();return}await saveNow(u)}else{db=migrateBusinessData(r.data);localStorage.setItem(DATA_KEY,JSON.stringify(db));if(r.settings)localStorage.setItem('hetzenSettings',JSON.stringify(r.settings));if(r.report_history)localStorage.setItem('hetzenReportHistory',JSON.stringify(r.report_history));if(db._documentCounters)localStorage.setItem('hetzenDocumentCounters',JSON.stringify(db._documentCounters));write({lastSyncedAt:r.updated_at||null,pending:false,conflict:false});renderAll()}}else{const has=Object.keys(db).some(k=>Array.isArray(db[k])&&db[k].length);if(has){write({pending:true});await saveNow(u)}else{write({pending:false,lastSyncedAt:null});renderAll()}}signed(true)}
+window.hetzenCloudSave=function(){clearTimeout(window.hetzenSaveTimer);if(!read().pending)return;window.hetzenSaveTimer=setTimeout(async()=>{try{await saveNow(await current())}catch(e){write({pending:true,offline:!navigator.onLine});badge(navigator.onLine?'● LOCAL CHANGES':'● OFFLINE');pwa(navigator.onLine?'Online • Changes waiting to sync':'Offline • Working locally; changes sync later');toast(navigator.onLine?'Cloud save failed; your changes remain on this device.':'Offline; changes will sync later.')}},350)};
+window.downloadUnsyncedBackup=function(){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({format:'Hetzen Unsynced Backup',exportedAt:new Date().toISOString(),data:migrateBusinessData(db),settings:JSON.parse(localStorage.getItem('hetzenSettings')||'null')},null,2)],{type:'application/json'}));a.href=u;a.download='hetzen-unsynced-changes.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)};
+window.logoutPortal=async function(){if(read().pending){showConflict();toast('Sync your changes before logging out.');return}try{await client.auth.signOut();Object.keys(localStorage).filter(k=>/^hetzenBusinessDataV2$|^hetzenSyncMetaV1$|^hetzenDocumentCounters$|^hetzenReportHistory$|^hetzenLastDocument/.test(k)).forEach(k=>localStorage.removeItem(k));location.reload()}catch(e){toast('Logout failed; please try again.')}};
+window.resetPortalPassword=async function(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email){err.textContent='Enter your account email first.';err.style.display='block';return}status.textContent='Sending password reset email...';const r=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(r.error){err.textContent='Password reset failed. Please check your connection.';err.style.display='block'}else status.textContent='Password reset email sent. Check your inbox.'};
+const login=async e=>{e.preventDefault();err.style.display='none';const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';const r=await client.auth.signInWithPassword({email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value});if(r.error){err.textContent=r.error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}try{await loadCloud(r.data.user)}catch(x){signed(true);badge('● CLOUD ERROR');renderAll();err.textContent='Signed in, but cloud data could not be loaded. Your local copy is preserved.';err.style.display='block'}btn.disabled=false;btn.textContent='Sign In'};
+client=window.supabase&&cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;window.hetzenSupabase=client;
+if(client){document.getElementById('loginForm')?.addEventListener('submit',login);client.auth.getSession().then(async r=>{if(r.data.session){try{await loadCloud(r.data.session.user)}catch(e){signed(true);badge(navigator.onLine?'● CLOUD ERROR':'● OFFLINE');renderAll()}}});client.auth.onAuthStateChange((_e,s)=>{if(!s)signed(false)})}else{signed(true);badge('● LOCAL MODE');pwa('Offline • Working locally; changes sync later');renderAll()}
+window.addEventListener('online',async()=>{pwa('Online • Reconnecting to cloud...');if(client){try{await saveNow(await current())}catch(e){toast('Back online; cloud sync is still waiting.')}}});window.addEventListener('offline',()=>{badge('● OFFLINE');pwa('Offline • Working locally; changes sync later')});
 })();
 </script>
 <script>
