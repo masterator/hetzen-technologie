@@ -9,22 +9,13 @@ on:
 jobs:
   documents-browser:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
+      - name: Install Node dependency
+        run: npm install --no-save playwright@1.56.1
 
       - name: Run real-browser document tests
         run: node .github/documents-browser-test.mjs
