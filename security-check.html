@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Free website security check for South African small businesses by Hetzen Technologies. Plain-language report, no obligation.">
+<link rel="icon" href="logo.png">
+<title>Free Website Security Check | Hetzen Technologies</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="legal.css">
+<style>
+.sc-hero{padding:8px 0 10px}
+.sc-hero h1{font-size:clamp(36px,6vw,56px);letter-spacing:-1.5px;line-height:1.05;margin-bottom:14px}
+.sc-hero .lead{font-size:18px;line-height:1.55;color:#cfcfcf;max-width:640px}
+.free{display:inline-block;background:#d4af37;color:#090909;font-weight:800;border-radius:20px;padding:4px 12px;font-size:13px;letter-spacing:1px;margin-bottom:14px}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0 6px}
+.check{background:#131313;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 18px}
+.check h3{margin:0 0 4px;color:#fff;font-size:16px}
+.check p{margin:0;font-size:15px;color:#cfcfcf}
+.sc-form{background:#131313;border:1px solid rgba(212,175,55,.35);border-radius:16px;padding:22px;margin-top:10px}
+.sc-form label{display:block;font-weight:700;color:#fff;font-size:15px;margin:14px 0 6px}
+.sc-form input[type=text],.sc-form input[type=url],.sc-form input[type=tel]{width:100%;min-height:50px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:#0d0d0d;color:#fff;font-size:16px;padding:0 14px}
+.sc-form .hint{font-size:13px;color:#b9b9b9;margin-top:4px}
+.sc-form .agree{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-weight:400;color:#dcdcdc;font-size:15px;line-height:1.5}
+.sc-form .agree input{width:22px;height:22px;flex:none;margin-top:2px;accent-color:#d4af37}
+.sc-form button{margin-top:18px;width:100%;min-height:54px;border:0;border-radius:12px;background:#d4af37;color:#090909;font-weight:800;font-size:17px;cursor:pointer}
+.sc-error{display:none;color:#ffb4a2;font-size:14px;margin-top:10px}
+</style>
+</head>
+<body>
+<header class="header"><div class="container nav">
+<a href="index.html" class="logo"><img src="logo.png" alt="Hetzen Technologies home" style="max-height:55px;width:auto"></a>
+<nav aria-label="Main"><a href="index.html#services">Services</a><a href="security.html">Security</a><a href="index.html#contact">Contact</a></nav>
+</div></header>
+
+<main class="doc"><div class="container" style="max-width:860px">
+<section class="sc-hero">
+<span class="free">FREE · NO OBLIGATION</span>
+<h1>Is your website safe?</h1>
+<p class="lead">We check your business website for the most common security problems and send you a short report in plain language: what's fine, what's risky, and what to fix first. It's free, and you don't have to buy anything.</p>
+</section>
+
+<h2>What we check</h2>
+<div class="checks">
+<div class="check"><h3>Padlock (HTTPS)</h3><p>Is every page encrypted, and is the certificate valid and not about to expire?</p></div>
+<div class="check"><h3>Out-of-date software</h3><p>Old WordPress, plugins or themes with known security holes.</p></div>
+<div class="check"><h3>Security settings</h3><p>Missing browser protections that stop common attacks.</p></div>
+<div class="check"><h3>Exposed admin and files</h3><p>Login pages, backups or settings files that anyone can find.</p></div>
+<div class="check"><h3>Forms and customer data</h3><p>Do your contact or order forms send information safely?</p></div>
+<div class="check"><h3>Blacklists and email</h3><p>Is your site flagged as unsafe by Google, and can scammers fake emails from your domain?</p></div>
+</div>
+
+<div class="note"><p style="margin:0"><strong>How we check:</strong> we only look at what any visitor can see from the outside. We never log in, never try to break in and never change anything on your site. We only check websites you own, or that you have permission to have checked.</p></div>
+
+<h2>What you get</h2>
+<ul>
+<li>A short report within <strong>3 working days</strong>, on WhatsApp or email.</li>
+<li>Each problem marked <strong>urgent</strong>, <strong>soon</strong> or <strong>nice to fix</strong>, in plain words.</li>
+<li>If you want help fixing anything, a clear quote. No pressure.</li>
+</ul>
+
+<h2 id="request">Request your free check</h2>
+<form class="sc-form" id="scForm" novalidate>
+<label for="scName">Your name</label>
+<input id="scName" type="text" autocomplete="name" required>
+<label for="scBusiness">Business name</label>
+<input id="scBusiness" type="text" autocomplete="organization">
+<label for="scSite">Website address</label>
+<input id="scSite" type="url" inputmode="url" placeholder="e.g. www.yourbusiness.co.za" required>
+<label class="agree" for="scOwn"><input id="scOwn" type="checkbox" required><span>I own this website, or I have permission from the owner to have it checked.</span></label>
+<button type="submit">Send request on WhatsApp</button>
+<p class="hint">This opens WhatsApp with your details filled in. Nothing is stored on this website. See our <a href="privacy.html">Privacy Policy</a>.</p>
+<p class="sc-error" id="scError" role="alert"></p>
+</form>
+
+<div class="doc-nav">
+<a href="security.html">How we keep projects secure</a>
+<a href="index.html#contact">Request a quote</a>
+<a href="index.html">Back to website</a>
+</div>
+</div></main>
+<script>
+(function(){
+  var f=document.getElementById('scForm'),err=document.getElementById('scError');
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=document.getElementById('scName').value.trim(),
+        biz=document.getElementById('scBusiness').value.trim(),
+        site=document.getElementById('scSite').value.trim(),
+        own=document.getElementById('scOwn').checked;
+    var msg=!name?'Please enter your name.':!site?'Please enter your website address.':!own?'Please confirm you own the website or have permission.':'';
+    if(msg){err.textContent=msg;err.style.display='block';return}
+    err.style.display='none';
+    var text='Hi Hetzen Technologies, I would like a FREE website security check.\n\nName: '+name+(biz?'\nBusiness: '+biz:'')+'\nWebsite: '+site+'\n\nI confirm I own this website or have permission to have it checked.';
+    window.location.href='https://wa.me/27786246258?text='+encodeURIComponent(text);
+  });
+})();
+</script>
+</body>
+</html>
