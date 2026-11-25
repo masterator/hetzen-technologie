@@ -1,8 +1,8 @@
 // Hetzen portal service worker
 // Network-first for pages/scripts so security fixes reach every device straight away.
 // Falls back to the cached copy only when offline.
-const CACHE='hetzen-portal-shell-v2';
-const SHELL=['./business-portal.html','./manifest.webmanifest','./logo.png','./hetzen-logo-transparent.png','./supabase-config.js','./portal-hardening.js'];
+const CACHE='hetzen-portal-shell-v3';
+const SHELL=['./business-portal.html','./manifest.webmanifest','./logo.png','./hetzen-logo-transparent.png','./supabase-config.js','./portal-hardening.js','./portal-ui.js','./portal-ui.css'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));

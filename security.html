@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="How Hetzen Technologies builds, tests and protects your website, app or business system, step by step.">
+<link rel="icon" href="logo.png">
+<title>How We Keep You Secure | Hetzen Technologies</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="legal.css">
+<style>
+.sec-hero{padding:8px 0 16px}
+.sec-hero h1{font-size:clamp(36px,6vw,58px);letter-spacing:-1.5px;line-height:1.05;margin-bottom:16px}
+.sec-hero p.lead{font-size:18px;line-height:1.55;color:#cfcfcf;max-width:640px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0 8px}
+.card{background:#131313;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px}
+.card h3{margin:10px 0 6px;color:#fff;font-size:16px}
+.card p{font-size:15px;margin:0;color:#cfcfcf}
+.card svg{color:#d4af37}
+.risk{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.risk b{font-family:ui-monospace,Menlo,monospace;color:#f0d36b;font-size:14px;padding-top:2px}
+.risk h3{margin:0 0 4px;color:#fff;font-size:16px}
+.risk p{margin:0;font-size:15px}
+details{background:#131313;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:0 18px;margin-bottom:10px}
+summary{cursor:pointer;min-height:52px;display:flex;align-items:center;font-weight:700;color:#fff;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;color:#d4af37;font-size:22px}
+details[open] summary::after{content:"–"}
+details p{padding-bottom:6px}
+</style>
+</head>
+<body>
+<header class="header"><div class="container nav">
+<a href="index.html" class="logo"><img src="logo.png" alt="Hetzen Technologies home" style="max-height:55px;width:auto"></a>
+<nav aria-label="Main"><a href="index.html#services">Services</a><a href="security.html" aria-current="page">Security</a><a href="index.html#contact">Contact</a></nav>
+</div></header>
+
+<main class="doc"><div class="container" style="max-width:900px">
+
+<section class="sec-hero">
+<p class="eyebrow">SECURITY</p>
+<h1>How we keep your business safe</h1>
+<p class="lead">Every website, app and system we build goes through the same security process before your customers ever see it. Here is every step, in plain language, and what you get at the end.</p>
+<div style="margin-top:18px">
+<span class="tag">OWASP Top 10:2025</span><span class="tag">OWASP ASVS 5.0</span><span class="tag">OWASP MASVS (mobile)</span><span class="tag">POPIA</span>
+</div>
+</section>
+
+<h2>What we protect</h2>
+<div class="grid3">
+<div class="card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/></svg><h3>Your customers' information</h3><p>Names, numbers, bookings and orders stay private and only reach the people who should see them.</p></div>
+<div class="card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h3>Your accounts and logins</h3><p>Admin areas need strong passwords and two-step verification, so a stolen password alone isn't enough.</p></div>
+<div class="card"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><h3>Your business running</h3><p>Backups, updates and monitoring mean a problem gets caught and fixed instead of taking you offline.</p></div>
+</div>
+
+<h2>Our process, step by step</h2>
+<ol class="steps">
+<li><h3>Plan with security in mind</h3><p>Before we build, we list what information your project will hold, who should see it and what could go wrong. If it holds personal information, we plan for POPIA from day one: only collecting what's needed, and deciding how long to keep it.</p></li>
+<li><h3>Set up accounts safely</h3><p>Hosting, domains and databases are registered in <strong>your</strong> name. Every admin account gets two-step verification. Each person and service only gets the access it needs, nothing more.</p></li>
+<li><h3>Keep secrets out of the code</h3><p>Passwords, API keys and database keys are never written into the website code or sent in normal messages. They're kept in secure settings on the server. We scan the code to make sure none slip through.</p></li>
+<li><h3>Lock down the data</h3><p>Database rules make sure each user can only reach their own records. We test this from the outside as three different people: a visitor who isn't logged in, a stranger with their own account, and the real owner. Only the owner should see the data.</p></li>
+<li><h3>Check every add-on we use</h3><p>Modern apps use ready-made building blocks. We check them for known security problems, keep them up to date, and only load outside scripts with a tamper check, so a changed file is refused.</p></li>
+<li><h3>Test against a recognised checklist</h3><p>We check your project against the OWASP Top 10, the world's most widely used list of web security risks (see below). For web apps we follow the OWASP Application Security Verification Standard (ASVS): Level 1 as our minimum, and Level 2 for systems holding sensitive or personal data. For mobile apps we follow the OWASP MASVS.</p></li>
+<li><h3>Test on real devices</h3><p>We open your project in real browsers on phone and computer, try every form and button, and try wrong or unexpected input to make sure nothing breaks or leaks.</p></li>
+<li><h3>Launch checklist</h3><p>HTTPS everywhere, test accounts deleted, admin two-step verification switched on, backups working, error messages that don't give away private details, and security settings checked by the hosting provider's own security tools.</p></li>
+<li><h3>Handover and report</h3><p>You get a plain-language security report: what we tested, what we found, what we fixed and anything you need to do. We hand over every login securely and remove our own access when you ask.</p></li>
+<li><h3>Aftercare</h3><p>On a support plan, we keep everything updated, re-run the security checks, and watch for problems. If something does go wrong, we tell you straight away and help you inform the Information Regulator and affected people, as POPIA requires.</p></li>
+</ol>
+
+<h2>The 10 risks we test for</h2>
+<p>These are the OWASP Top 10:2025 web application security risks, explained simply, with what we check for each.</p>
+<div class="risk"><b>A01</b><div><h3>Broken access control</h3><p>Can someone see or change data that isn't theirs? We test as a stranger and as a logged-out visitor.</p></div></div>
+<div class="risk"><b>A02</b><div><h3>Security misconfiguration</h3><p>Are any settings left open, like default passwords, extra permissions or debug pages? We switch off what isn't needed.</p></div></div>
+<div class="risk"><b>A03</b><div><h3>Software supply chain failures</h3><p>Is any add-on or library out of date or tampered with? We scan and update them, and verify outside files.</p></div></div>
+<div class="risk"><b>A04</b><div><h3>Cryptographic failures</h3><p>Is information encrypted when it travels and when it's stored? We use HTTPS everywhere and never store passwords in plain text.</p></div></div>
+<div class="risk"><b>A05</b><div><h3>Injection</h3><p>Can someone type something sneaky into a form to run code or read the database? We escape and check all input.</p></div></div>
+<div class="risk"><b>A06</b><div><h3>Insecure design</h3><p>Is the plan itself safe? We think through misuse before building, not after.</p></div></div>
+<div class="risk"><b>A07</b><div><h3>Authentication failures</h3><p>Can logins be guessed or bypassed? We use strong password rules, limits on attempts, and two-step verification for admins.</p></div></div>
+<div class="risk"><b>A08</b><div><h3>Software or data integrity failures</h3><p>Could an update or file be swapped for a harmful one? We check files before they run.</p></div></div>
+<div class="risk"><b>A09</b><div><h3>Logging and alerting failures</h3><p>Would we notice an attack? We make sure important events are recorded and problems raise an alert.</p></div></div>
+<div class="risk"><b>A10</b><div><h3>Mishandling of exceptional conditions</h3><p>What happens when something fails? We make sure errors fail safely and don't reveal private details.</p></div></div>
+
+<h2>Mobile apps</h2>
+<p>For Android and iOS apps we also check the eight areas of the OWASP Mobile Application Security Verification Standard (MASVS): how the app stores data on the phone, encryption, login, network connections, use of phone features, code quality, resistance to tampering, and privacy.</p>
+
+<h2>How we protect our own systems</h2>
+<p>We hold ourselves to the same standard. Our own business portal:</p>
+<ul>
+<li>needs a password <strong>and</strong> a 6-digit authenticator code to sign in;</li>
+<li>uses database rules that refuse your records to anyone else, even if they get our website's public key;</li>
+<li>has been tested as a logged-out visitor and as a stranger, and both saw nothing;</li>
+<li>clears customer data from the device when we log out;</li>
+<li>has two-step verification on every admin account behind it (database and code hosting).</li>
+</ul>
+
+<div class="note">
+<p style="margin:0"><strong>Being honest about limits:</strong> no system can be made 100% unbreakable. Our checks find and fix the common, serious problems that cause most real attacks. For systems handling payments, medical or highly sensitive data, we also recommend an independent penetration test by a specialist firm, and we'll help you arrange and prepare for it.</p>
+</div>
+
+<h2>Common questions</h2>
+<details><summary>Do I need to understand any of this?</summary><p>No. You get a plain-language report and we explain anything you need to do. Usually that's just switching on two-step verification on your phone.</p></details>
+<details><summary>Is security extra?</summary><p>No. The steps above are part of every project. Extra items, like an independent penetration test or ongoing monitoring, are quoted separately so you can choose.</p></details>
+<details><summary>Can you check a website or app someone else built?</summary><p>Yes. We can run the same checks on an existing site or app and give you a report with what to fix, in order of importance.</p></details>
+<details><summary>What if something goes wrong after launch?</summary><p>Contact us straight away on WhatsApp. On a support plan, we act immediately. We'll help you contain the problem, fix it and, if personal information was affected, notify the Information Regulator and your customers as the law requires.</p></details>
+<details><summary>How do I send you my passwords safely?</summary><p>Don't send them in a normal WhatsApp or email. We'll invite you to give us access through the provider's own team or user settings, or show you a secure one-time sharing method.</p></details>
+
+<div class="doc-nav">
+<a class="primary" href="https://wa.me/27786246258">Ask for a security check</a>
+<a href="index.html#contact">Request a quote</a>
+<a href="privacy.html">Privacy Policy</a>
+<a href="terms.html">Terms &amp; Conditions</a>
+</div>
+</div></main>
+</body>
+</html>

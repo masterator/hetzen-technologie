@@ -1,0 +1,93 @@
+/* Hetzen Portal — calm, plain UI layer (loaded after the original styles) */
+:root{--gold:#D4AF37;--gold-ink:#7A5C00;--black:#0A0A0A;--late:#C2410C;--field:#CFCFCB}
+html[data-theme="dark"]{--gold-ink:#E2C45B;--late:#F08A5D;--field:#4A4843}
+@media (prefers-color-scheme:dark){html[data-theme="system"]{--gold-ink:#E2C45B;--late:#F08A5D;--field:#4A4843}}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* Sidebar */
+.side{background:var(--black)}
+.side .brand small{display:none}
+.side .nav .group{font-size:11px;letter-spacing:.08em;color:#8A8A85;margin:18px 12px 6px;text-transform:uppercase}
+.side .nav button{display:flex;align-items:center;gap:12px;min-height:44px;border-radius:10px;font-size:15px;color:#CFCFCF}
+.side .nav button svg{flex:none;width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;opacity:.9}
+.side .nav button.active{background:#1F1F1F;color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--gold)}
+.side .nav details{margin-top:6px}
+.side .nav details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;color:#A8A8A8;font-size:15px}
+.side .nav details summary::-webkit-details-marker{display:none}
+.side .nav details summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid #8A8A85;border-bottom:2px solid #8A8A85;transform:rotate(45deg);transition:transform .15s}
+.side .nav details[open] summary::after{transform:rotate(-135deg)}
+.side .nav details button{font-size:14px;min-height:40px;color:#BDBDBD}
+
+/* Top bar */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.top .tag{display:none}
+.cloud-badge{font-size:13px;font-weight:500;color:var(--muted);background:transparent;border:0;padding:0 4px;letter-spacing:0;white-space:nowrap}
+.cloud-badge[data-state="ok"]{color:#2F7A3A}
+.cloud-badge[data-state="warn"]{color:var(--late)}
+.btn{border-radius:10px;min-height:44px;font-weight:600}
+.btn.gold{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.btn.light{background:var(--surface);border:1px solid var(--field);color:var(--ink)}
+
+/* Page headings */
+.page .hero{background:transparent;border:0;box-shadow:none;padding:4px 0 14px;color:var(--ink)}
+.page .hero h2{font-size:26px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.page .hero p{color:var(--muted)}
+.notice{background:var(--surface);border:1px solid var(--line);color:var(--muted);border-radius:12px;font-size:14px}
+
+/* Panels, tables */
+.panel,.table{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:none}
+.panel h3{font-size:16px;font-weight:600}
+table th{font-size:12px;letter-spacing:.04em;color:var(--muted);text-transform:none;font-weight:600}
+.empty{color:var(--muted)}
+
+/* Home */
+.home-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
+.home-head h2{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}
+.home-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.home-actions{display:flex;gap:10px;flex-wrap:wrap}
+.home-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.home-stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.home-stat:hover{border-color:var(--field)}
+.home-stat .k{font-size:14px;color:var(--muted)}
+.home-stat .v{font-size:28px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.home-stat .s{font-size:13px;color:var(--muted);margin-top:2px}
+.home-stat .s.late{color:var(--late)}
+.home-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px}
+@media(max-width:900px){.home-grid{grid-template-columns:1fr}}
+.more-numbers{margin-top:16px}
+.more-numbers>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--gold-ink)}
+.cards .card{box-shadow:none;border:1px solid var(--line)}
+
+/* Forms in pop-ups */
+.modal-box{border-radius:18px}
+.modal-head h3{font-size:19px;font-weight:600}
+.field label{font-size:14px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0}
+.field input,.field select,.field textarea{min-height:48px;border-radius:12px;border:1px solid var(--field);font-size:16px;background:var(--surface)}
+.field textarea{min-height:96px}
+.field .hint{display:block;font-size:13px;color:var(--muted);margin-top:4px;font-weight:400}
+.optional{grid-column:1/-1;margin-top:4px}
+.optional>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;color:var(--gold-ink);font-size:15px}
+.optional>summary::-webkit-details-marker{display:none}
+.optional>summary::before{content:"+";font-size:20px;line-height:1}
+.optional[open]>summary::before{content:"–"}
+.optional[open]>summary{color:var(--muted)}
+.optional>.formgrid{background:var(--surface2);border-radius:14px;padding:14px;margin-top:4px}
+form>.btn.gold{width:100%;min-height:52px;font-size:16px}
+@media(min-width:700px){form>.btn.gold{width:auto;min-width:200px}}
+
+/* Quick add sheet */
+#quickModal .quick-grid{grid-template-columns:1fr;gap:8px}
+#quickModal .quick{min-height:52px;text-align:left;border-radius:12px;background:var(--surface2);border:0;box-shadow:none}
+#quickModal .quick span{display:none}
+
+/* Phone bottom bar */
+.mobile-nav{background:var(--surface);border-top:1px solid var(--line);box-shadow:none;align-items:center}
+.mobile-nav button{color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;background:none;border:0}
+.mobile-nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+.mobile-nav button.active{color:var(--ink);font-weight:600}
+.mobile-nav .add-btn{width:56px;height:56px;min-height:56px;border-radius:28px;background:var(--gold);color:var(--black);margin-top:-26px;box-shadow:0 4px 12px rgba(0,0,0,.18);justify-content:center}
+.mobile-nav .add-btn svg{width:26px;height:26px;stroke-width:2.5}
+
+/* Settings: sync panel lives here now */
+#settings .sync-optimizer-panel{margin-bottom:16px}
