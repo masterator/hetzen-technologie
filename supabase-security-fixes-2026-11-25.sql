@@ -73,7 +73,8 @@ create policy services_owner_all on public.services for all to authenticated
 
 -- 5. Indexes (speed) + remove the duplicate index on portal_state.
 create index if not exists business_records_owner_id_idx  on public.business_records (owner_id);
-create index if not exists business_records_client_id_idx on public.business_records (client_id);
+drop index if exists public.business_records_client_id_idx;
+create index if not exists business_records_client_owner_idx on public.business_records (client_id, owner_id);
 create index if not exists clients_owner_id_idx           on public.clients (owner_id);
 create index if not exists services_owner_id_idx          on public.services (owner_id);
 alter table public.portal_state drop constraint if exists portal_state_owner_id_unique;
