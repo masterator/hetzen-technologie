@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--ink)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.98.0/dist/umd/supabase.min.js" integrity="sha384-Sm2s7OXxsAMTyJ4iIyRBgVpeGUvMPk2lRQnnZhE78Wej7oggIoolKt+SCt0XJbUB" crossorigin="anonymous"></script><script src="supabase-config.js"></script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="logo.png" type="image/png"><meta name="theme-color" content="#11110f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hetzen Portal">
 <style>.pwa-status{position:fixed;right:14px;bottom:14px;z-index:9999;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;color:var(--muted)}.pwa-status.online{display:none}.install-btn{display:none}.install-btn.show{display:inline-flex}</style></head>
 <body><div id="pwaStatus" class="pwa-status">Cloud-ready</div>
-<div id="authGate"><div class="auth-card"><img class="auth-logo" src="hetzen-logo-transparent.png" alt="Hetzen Technologies logo"><h2>Hetzen Business Portal</h2><p>Sign in to your secure Hetzen Technologies workspace.</p><div id="authError" class="auth-error"></div><form id="loginForm"><div class="field"><label>Email</label><input id="authEmail" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input id="authPassword" type="password" required autocomplete="current-password"></div><button id="loginBtn" class="btn gold" type="submit" style="width:100%">Sign In</button></form><div class="auth-links"><button type="button" onclick="resetPortalPassword()">Forgot password?</button></div><div id="authStatus" class="auth-status"></div></div></div>
+<div id="authGate"><div class="auth-card"><img class="auth-logo" src="hetzen-logo-transparent.png" alt="Hetzen Technologies logo"><h2>Hetzen Business Portal</h2><p>Sign in to your secure Hetzen Technologies workspace.</p><div id="authError" class="auth-error"></div><form id="loginForm"><div class="field"><label>Email</label><input id="authEmail" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input id="authPassword" type="password" required autocomplete="current-password"></div><button id="loginBtn" class="btn gold" type="submit" style="width:100%">Sign In</button></form><div id="mfaStep" style="display:none"><h3 id="mfaTitle" style="margin:4px 0 8px">Two-step verification</h3><div id="mfaEnroll" style="display:none"><p style="margin:0 0 10px">Scan this QR code with Google Authenticator or Microsoft Authenticator, then type the 6-digit code it shows.</p><div style="background:#fff;padding:10px;border-radius:10px;width:fit-content;margin:0 auto 10px"><img id="mfaQr" alt="Authenticator QR code" style="width:180px;height:180px;display:block"></div><p style="font-size:12px;margin:0 0 10px;word-break:break-all">Can't scan? Enter this key manually: <code id="mfaSecret"></code></p></div><p id="mfaPrompt" style="margin:0 0 10px">Enter the 6-digit code from your authenticator app.</p><form id="mfaForm"><div class="field"><label for="mfaCode">6-digit code</label><input id="mfaCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></div><button id="mfaBtn" class="btn gold" type="submit" style="width:100%">Verify</button></form><div class="auth-links"><button type="button" id="mfaCancel">Cancel and sign out</button></div></div><div class="auth-links"><button type="button" onclick="resetPortalPassword()">Forgot password?</button></div><div id="authStatus" class="auth-status"></div></div></div>
 <div class="app">
 <div id="mobileOverlay" class="mobile-overlay" onclick="closeMobileNav()"></div>
 <aside class="side"><button class="menu-close" type="button" aria-label="Close menu" onclick="closeMobileNav()">×</button>
@@ -364,6 +364,54 @@ function init(){initTheme();const saved=JSON.parse(localStorage.getItem('hetzenS
 
 
 <script>
+/* Two-step verification (TOTP) for the portal login.
+   Resolves true once the session is aal2. The database also refuses
+   portal data to aal1 sessions once a factor is enrolled, so this screen
+   is not the only protection. */
+window.hetzenEnsureMfa=async function(client){
+  const $=id=>document.getElementById(id);
+  const gate=$('authGate'),form=$('loginForm'),step=$('mfaStep'),err=$('authError');
+  const {data:aal,error:aalErr}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(aalErr)throw aalErr;
+  if(aal.currentLevel==='aal2')return true;
+  const {data:list,error:listErr}=await client.auth.mfa.listFactors();
+  if(listErr)throw listErr;
+  let factorId,enrolling=false;
+  const verified=(list.totp||[]).find(f=>f.status==='verified');
+  if(verified){factorId=verified.id}
+  else{
+    for(const f of (list.all||[]).filter(f=>f.factor_type==='totp'&&f.status!=='verified')){await client.auth.mfa.unenroll({factorId:f.id})}
+    const {data:en,error:enErr}=await client.auth.mfa.enroll({factorType:'totp',friendlyName:'Hetzen Portal '+new Date().toISOString().slice(0,10)});
+    if(enErr)throw enErr;
+    factorId=en.id;enrolling=true;
+    $('mfaQr').src=en.totp.qr_code;
+    $('mfaSecret').textContent=en.totp.secret;
+  }
+  gate.classList.remove('auth-hidden');
+  if(form)form.style.display='none';
+  $('mfaEnroll').style.display=enrolling?'block':'none';
+  $('mfaTitle').textContent=enrolling?'Set up two-step verification':'Two-step verification';
+  step.style.display='block';err.style.display='none';
+  const code=$('mfaCode');code.value='';setTimeout(()=>code.focus(),50);
+  return new Promise(resolve=>{
+    const done=ok=>{$('mfaForm').onsubmit=null;$('mfaCancel').onclick=null;step.style.display='none';$('mfaQr').removeAttribute('src');$('mfaSecret').textContent='';if(form)form.style.display='';resolve(ok)};
+    $('mfaForm').onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$('mfaBtn');btn.disabled=true;btn.textContent='Checking...';err.style.display='none';
+      const {error}=await client.auth.mfa.challengeAndVerify({factorId,code:code.value.trim()});
+      btn.disabled=false;btn.textContent='Verify';
+      if(error){err.textContent='That code did not work. Wait for a new code and try again.';err.style.display='block';code.value='';code.focus();return}
+      done(true);
+    };
+    $('mfaCancel').onclick=async()=>{
+      try{if(enrolling)await client.auth.mfa.unenroll({factorId})}catch(e){}
+      try{await client.auth.signOut()}catch(e){}
+      done(false);location.reload();
+    };
+  });
+};
+</script>
+<script>
 (function(){
 const cfg=window.HETZEN_CONFIG||{},KEY='hetzenSyncMetaV1',MODE_KEY='hetzenSyncModeV1';const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}}};window.readSyncMeta=read;const syncMode=()=>localStorage.getItem(MODE_KEY)==='offline'?'offline':'cloud';
 const write=x=>localStorage.setItem(KEY,JSON.stringify({...read(),...x}));
@@ -400,9 +448,9 @@ window.hetzenCloudSave=function(){clearTimeout(window.hetzenSaveTimer);paintSync
 window.toggleHetzenSyncMode=function(){const next=syncMode()==='cloud'?'offline':'cloud';if(next==='offline'){localStorage.setItem(MODE_KEY,'offline');badge('● OFFLINE MODE');pwa('Offline mode selected • changes saved locally');paintSyncMode();if(typeof toast==='function')toast('Offline mode enabled. Changes will not upload until Cloud Sync is enabled.');return}if(!confirm('Turn Cloud Sync back on? Local changes may be uploaded if the cloud copy has not changed. If another device changed the cloud data, a conflict warning will appear.'))return;localStorage.setItem(MODE_KEY,'cloud');paintSyncMode();if(typeof toast==='function')toast('Cloud Sync enabled. Checking local changes…');(async()=>{try{const u=await current();if(!navigator.onLine){badge('● OFFLINE');pwa('No internet • changes remain saved locally');paintSyncMode();return}if(u){await saveNow(u);paintSyncMode()}else{badge('● LOCAL MODE');paintSyncMode()}}catch(e){write({pending:true,offline:!navigator.onLine});badge('● LOCAL CHANGES');pwa('Cloud sync could not finish; local changes are retained');paintSyncMode();if(typeof toast==='function')toast('Sync did not finish. Your local changes are retained.')}})()};window.optimizeHetzenPortal=function(){const data=typeof db==='object'&&db?db:{},collections=Object.keys(data).filter(k=>Array.isArray(data[k])),total=collections.reduce((n,k)=>n+data[k].length,0),missingIds=collections.reduce((n,k)=>n+data[k].filter(x=>x&&typeof x==='object'&&!x.id).length,0),ids=collections.flatMap(k=>data[k].filter(x=>x&&typeof x==='object'&&x.id).map(x=>String(x.id))),duplicates=ids.length-new Set(ids).size;let storageBytes=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';storageBytes+=(k.length+(localStorage.getItem(k)||'').length)*2}}catch(e){}const m=read(),mode=syncMode(),status=!navigator.onLine?'Offline — local only':mode==='offline'?'Offline mode selected':m.conflict?'Conflict — review before syncing':m.pending?'Changes waiting to sync':'No queued changes detected';const el=document.getElementById('optimizerResults');if(el)el.innerHTML='<strong>Optimizer check complete</strong><br>Records checked: '+total+' across '+collections.length+' data groups · Missing record IDs: '+missingIds+' · Duplicate IDs: '+duplicates+'<br>Browser storage estimate: '+(storageBytes/1024).toFixed(1)+' KB · Sync: '+status+'<br>Safe action: dashboard views refreshed. No customer, invoice, payment or project records were deleted or merged.';try{if(typeof renderAll==='function')renderAll()}catch(e){}paintSyncMode();if(typeof toast==='function')toast('Portal check finished. Review the optimizer report.');return {records:total,collections:collections.length,missingIds,duplicateIds:duplicates,storageBytes,syncStatus:status}};window.downloadUnsyncedBackup=function(){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({format:'Hetzen Unsynced Backup',exportedAt:new Date().toISOString(),data:migrateBusinessData(db),settings:JSON.parse(localStorage.getItem('hetzenSettings')||'null')},null,2)],{type:'application/json'}));a.href=u;a.download='hetzen-unsynced-changes.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)};
 window.logoutPortal=async function(){if(read().pending){showConflict();toast('Sync your changes before logging out.');return}try{await client.auth.signOut();Object.keys(localStorage).filter(k=>/^hetzen/.test(k)&&!/^(hetzenSettings|hetzenTheme|hetzenSyncModeV1)$/.test(k)).forEach(k=>localStorage.removeItem(k));Object.keys(sessionStorage).filter(k=>/^hetzen/.test(k)).forEach(k=>sessionStorage.removeItem(k));location.reload()}catch(e){toast('Logout failed; please try again.')}};
 window.resetPortalPassword=async function(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email){err.textContent='Enter your account email first.';err.style.display='block';return}status.textContent='Sending password reset email...';const r=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(r.error){err.textContent='Password reset failed. Please check your connection.';err.style.display='block'}else status.textContent='Password reset email sent. Check your inbox.'};
-const login=async e=>{e.preventDefault();err.style.display='none';const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';const r=await client.auth.signInWithPassword({email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value});if(r.error){err.textContent=r.error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}try{await loadCloud(r.data.user)}catch(x){signed(true);badge('● CLOUD ERROR');renderAll();err.textContent='Signed in, but cloud data could not be loaded. Your local copy is preserved.';err.style.display='block'}btn.disabled=false;btn.textContent='Sign In'};
+const login=async e=>{e.preventDefault();err.style.display='none';const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Signing in...';const r=await client.auth.signInWithPassword({email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value});if(r.error){err.textContent=r.error.message;err.style.display='block';btn.disabled=false;btn.textContent='Sign In';return}let mfaOk=false;try{mfaOk=await window.hetzenEnsureMfa(client)}catch(x){err.textContent='Two-step verification could not start. Check your connection and try again.';err.style.display='block'}btn.disabled=false;btn.textContent='Sign In';if(!mfaOk)return;try{await loadCloud(r.data.user)}catch(x){signed(true);badge('● CLOUD ERROR');renderAll();err.textContent='Signed in, but cloud data could not be loaded. Your local copy is preserved.';err.style.display='block'}btn.disabled=false;btn.textContent='Sign In'};
 client=window.supabase&&cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;window.hetzenSupabase=client;
-if(client){document.getElementById('loginForm')?.addEventListener('submit',login);client.auth.getSession().then(async r=>{if(r.data.session){try{await loadCloud(r.data.session.user)}catch(e){signed(true);badge(navigator.onLine?'● CLOUD ERROR':'● OFFLINE');renderAll()}}});client.auth.onAuthStateChange((_e,s)=>{if(!s)signed(false)})}else{signed(true);badge('● LOCAL MODE');pwa('Offline • Working locally; changes sync later');renderAll()}
+if(client){document.getElementById('loginForm')?.addEventListener('submit',login);client.auth.getSession().then(async r=>{if(r.data.session){let mfaOk=false;try{mfaOk=await window.hetzenEnsureMfa(client)}catch(x){signed(false);err.textContent='Two-step verification could not start. Check your connection and refresh.';err.style.display='block'}if(!mfaOk)return;try{await loadCloud(r.data.session.user)}catch(e){signed(true);badge(navigator.onLine?'● CLOUD ERROR':'● OFFLINE');renderAll()}}});client.auth.onAuthStateChange((_e,s)=>{if(!s)signed(false)})}else{signed(true);badge('● LOCAL MODE');pwa('Offline • Working locally; changes sync later');renderAll()}
 window.addEventListener('online',async()=>{if(syncMode()==='offline'){badge('● OFFLINE MODE');pwa('Offline mode selected • changes saved locally');paintSyncMode();return}pwa('Online • Reconnecting to cloud...');if(client){try{await saveNow(await current())}catch(e){toast('Back online; cloud sync is still waiting.')}}paintSyncMode()});window.addEventListener('offline',()=>{badge('● OFFLINE');pwa('Offline • Working locally; changes sync later');paintSyncMode()});paintSyncMode();
 })();
 </script>
