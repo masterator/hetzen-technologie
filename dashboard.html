@@ -1,72 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="0; url=https://portal.hetzen.org/dashboard.html">
+<title>Moved – Hetzen Technologies</title>
 <link rel="icon" href="logo.png">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hetzen Technologies | Business Dashboard</title>
-<meta name="description" content="Hetzen Technologies business operations dashboard.">
-<link rel="stylesheet" href="dashboard.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.98.0/dist/umd/supabase.min.js" integrity="sha384-Sm2s7OXxsAMTyJ4iIyRBgVpeGUvMPk2lRQnnZhE78Wej7oggIoolKt+SCt0XJbUB" crossorigin="anonymous"></script>
-<script src="supabase-config.js"></script>
 </head>
-<body>
-<div id="loginScreen" class="modal"><div class="modal-card"><h2>Hetzen Business OS</h2><p>Sign in to access your business dashboard.</p><form id="loginForm"><label>Email<input id="loginEmail" type="email" required></label><label>Password<input id="loginPassword" type="password" required></label><button class="primary" type="submit">Sign in</button><p id="loginError" class="danger-note"></p></form></div></div>
-<div class="app" id="appShell" style="display:none">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <img src="logo.png" alt="Hetzen Technologies logo">
-      <div><strong>Hetzen</strong><span>Business OS</span></div>
-    </div>
-    <nav>
-      <button class="nav-item active" data-view="overview">⌂ <span>Overview</span></button>
-      <button class="nav-item" data-view="clients">◉ <span>Clients</span></button>
-      <button class="nav-item" data-view="leads">◎ <span>Leads</span></button>
-      <button class="nav-item" data-view="quotes">▤ <span>Quotes</span></button>
-      <button class="nav-item" data-view="invoices">▧ <span>Invoices</span></button>
-      <button class="nav-item" data-view="projects">◫ <span>Projects</span></button>
-      <button class="nav-item" data-view="services">◆ <span>Services</span></button>
-      <button class="nav-item" data-view="tasks">✓ <span>Tasks</span></button>
-      <button class="nav-item" data-view="documents">▣ <span>Documents</span></button>
-      <button class="nav-item" data-view="reports">▥ <span>Reports</span></button>
-      <button class="nav-item" data-view="settings">⚙ <span>Settings</span></button>
-    </nav>
-    <div class="side-note"><small>Technology. Digital Solutions. Business Growth.</small></div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <button class="menu" id="menu">☰</button>
-      <div><span class="eyebrow">HETZEN TECHNOLOGIES</span><h1 id="pageTitle">Business Overview</h1></div>
-      <div class="top-actions"><span class="status-dot"></span><span>System ready</span><button id="quickAdd">+ Add</button><button id="logoutBtn" class="ghost">Log out</button></div>
-    </header>
-
-    <section class="content" id="content"></section>
-  </main>
-</div>
-
-<div class="modal hidden" id="modal">
-  <div class="modal-card">
-    <button class="close" id="closeModal">×</button>
-    <h2 id="modalTitle">Add record</h2>
-    <form id="recordForm">
-      <input type="hidden" id="recordType">
-      <label>Name / Company<input id="recordName" required></label>
-      <label>Type
-        <select id="recordCategory">
-          <option>Website & Web Development</option><option>AI & Automation</option>
-          <option>Custom Software</option><option>API & System Integration</option>
-          <option>Branding & Digital Identity</option><option>IT / Digital Solutions</option>
-        </select>
-      </label>
-      <label>Status
-        <select id="recordStatus"><option>New</option><option>In Progress</option><option>Quoted</option><option>Active</option><option>Completed</option><option>Paid</option></select>
-      </label>
-      <label>Value (R)<input id="recordValue" type="number" min="0" step="0.01" value="0"></label>
-      <button class="primary" type="submit">Save Record</button>
-    </form>
-  </div>
-</div>
-<script src="dashboard.js"></script>
+<body style="background:#0A0A0A;color:#D4AF37;font-family:sans-serif;text-align:center;padding:60px">
+<p>This page has moved. <a href="https://portal.hetzen.org/dashboard.html" style="color:#D4AF37">Continue</a></p>
+<script>location.replace('https://portal.hetzen.org/dashboard.html');</script>
 </body>
 </html>
